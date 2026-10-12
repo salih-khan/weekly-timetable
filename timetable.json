@@ -20,5 +20,9 @@
     { "day": "Fri", "start": "09:00", "end": "11:00", "title": "Chinese Language and Society", "info": "CL2005 · GR273 Greenbank Building" },
     { "day": "Fri", "start": "18:00", "end": "19:00", "title": "Reading", "info": "Library" },
     { "day": "Fri", "start": "11:00", "end": "13:00", "title": "CT & CC Enc. in Asia Pacific", "info": "AI2001 · GR273 Greenbank Building" }
+  ],
+  "assignments": [
+    { "due": "2026-12-10", "title": "Presentation", "info": "Group", "desc": "8am on the 10th" },
+    { "due": "2027-01-01", "title": "Portfolio", "info": "Individual", "desc": "To be taken." }
   ]
 }
