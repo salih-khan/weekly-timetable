@@ -14,11 +14,11 @@
     { "day": "Wed", "start": "13:00", "end": "14:00", "title": "Reading", "info": "Library" },
 
     { "day": "Thu", "start": "13:00", "end": "15:00", "title": "Aspects of Chinese Society", "info": "CL2001 · HA344 Harrington Building" },
+    { "day": "Thu", "start": "15:30", "end": "17:30", "title": "HSK3.0" },
     { "day": "Thu", "start": "18:00", "end": "19:00", "title": "Reading", "info": "Library" },
-    { "day": "Thu", "start": "19:00", "end": "21:00", "title": "HSK3.0" },
 
     { "day": "Fri", "start": "09:00", "end": "11:00", "title": "Chinese Language and Society", "info": "CL2005 · GR273 Greenbank Building" },
-    { "day": "Fri", "start": "15:30", "end": "17:30", "title": "Reading", "info": "Library" },
+    { "day": "Fri", "start": "18:00", "end": "19:00", "title": "Reading", "info": "Library" },
     { "day": "Fri", "start": "11:00", "end": "13:00", "title": "CT & CC Enc. in Asia Pacific", "info": "AI2001 · GR273 Greenbank Building" }
   ]
 }
