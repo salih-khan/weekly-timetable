@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weekly Lesson Timetable</title>
+
+<!-- ===== EDIT YOUR TIMETABLE HERE ===== -->
+<script type="application/json" id="timetable">
+{
+  "title": "Weekly Lessons",
+  "lessons": [
+    { "day": "Mon", "start": "09:30", "end": "11:00", "title": "Maths", "info": "Room 4" },
+    { "day": "Mon", "start": "13:00", "end": "14:00", "title": "English", "info": "Room 2" },
+    { "day": "Tue", "start": "10:00", "end": "11:30", "title": "Science", "info": "Lab 1" },
+    { "day": "Tue", "start": "15:00", "end": "16:00", "title": "Art", "info": "Studio" },
+    { "day": "Wed", "start": "09:30", "end": "11:00", "title": "Maths", "info": "Room 4" },
+    { "day": "Wed", "start": "14:00", "end": "15:30", "title": "History", "info": "Room 3" },
+    { "day": "Thu", "start": "11:00", "end": "12:00", "title": "English", "info": "Room 2" },
+    { "day": "Thu", "start": "16:00", "end": "17:30", "title": "Coding Club", "info": "IT Suite" },
+    { "day": "Fri", "start": "10:00", "end": "11:30", "title": "Science", "info": "Lab 1" }
+  ]
+}
+</script>
+<!-- ===================================== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: hour gutter + one column per day, lessons placed to scale by time; grid scrolls sideways on phones */
+:root{
+  --bg:#f3f4f7; --surface:#ffffff; --ink:#0f1115; --muted:#6a7183;
+  --line:#e4e7ed; --line-soft:#eff1f5; --today:#f7f8fc; --now:#e5484d;
+  --sans:"Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --hour:64px;
+  --blue-bg:#e5ecff;   --blue-fg:#1c3a96;
+  --green-bg:#e0f4e8;  --green-fg:#1b5835;
+  --amber-bg:#fcefd4;  --amber-fg:#774809;
+  --rose-bg:#fde5ea;   --rose-fg:#8a2135;
+  --violet-bg:#ede7fe; --violet-fg:#4a2b96;
+  --teal-bg:#daf2f1;   --teal-fg:#14585a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c0e12; --surface:#15181e; --ink:#eef0f4; --muted:#9097a6;
+    --line:#262a33; --line-soft:#1d2027; --today:#1a1e27; --now:#ff6369;
+    --blue-bg:#1a2550;   --blue-fg:#cdd8ff;
+    --green-bg:#143327;  --green-fg:#bdebd0;
+    --amber-bg:#352910;  --amber-fg:#f5d99d;
+    --rose-bg:#3a1b24;   --rose-fg:#ffc9d3;
+    --violet-bg:#271f45; --violet-fg:#dbcfff;
+    --teal-bg:#113233;   --teal-fg:#b6e8e7;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c0e12; --surface:#15181e; --ink:#eef0f4; --muted:#9097a6;
+  --line:#262a33; --line-soft:#1d2027; --today:#1a1e27; --now:#ff6369;
+  --blue-bg:#1a2550;   --blue-fg:#cdd8ff;
+  --green-bg:#143327;  --green-fg:#bdebd0;
+  --amber-bg:#352910;  --amber-fg:#f5d99d;
+  --rose-bg:#3a1b24;   --rose-fg:#ffc9d3;
+  --violet-bg:#271f45; --violet-fg:#dbcfff;
+  --teal-bg:#113233;   --teal-fg:#b6e8e7;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
+.page{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:40px 56px;display:grid;gap:24px}
+h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.035em;line-height:1.05}
+
+.wrap{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow-x:auto}
+.board{display:grid;grid-template-columns:56px repeat(var(--days),minmax(130px,1fr));min-width:calc(56px + var(--days) * 130px)}
+
+.corner{position:sticky;left:0;z-index:4;background:var(--surface);border-bottom:1px solid var(--line)}
+.head{display:flex;align-items:center;gap:8px;padding:16px 12px 14px;border-bottom:1px solid var(--line);border-left:1px solid var(--line-soft);font-size:14px;font-weight:600;letter-spacing:-.01em}
+.head.today{background:var(--today)}
+.pill{font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px;background:var(--ink);color:var(--surface)}
+
+.times{position:sticky;left:0;z-index:3;height:var(--h);background:var(--surface)}
+.times span{position:absolute;right:10px;font-family:var(--mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.col{position:relative;height:var(--h);border-left:1px solid var(--line-soft);
+  background-image:linear-gradient(to bottom,var(--line-soft) 1px,transparent 1px);background-size:100% var(--hour)}
+.col.today{background-color:var(--today)}
+
+.lesson{position:absolute;z-index:1;display:flex;flex-direction:column;gap:2px;min-width:0;padding:7px 10px;border-radius:10px;overflow:hidden;background:var(--c-bg);color:var(--c-fg)}
+.lesson time{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;opacity:.8}
+.lesson strong{font-size:14px;font-weight:600;line-height:1.2;letter-spacing:-.01em;overflow-wrap:anywhere}
+.lesson span{font-size:12.5px;opacity:.8}
+.lesson.short{flex-direction:row;align-items:baseline;gap:6px;padding-block:4px}
+.lesson.short strong{order:-1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lesson.short time{flex:none}
+
+.now{position:absolute;left:0;right:0;height:2px;background:var(--now);z-index:2;pointer-events:none}
+.now::before{content:"";position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--now)}
+.msg{margin:0;padding:24px;color:var(--muted)}
+
+[data-c="blue"]{--c-bg:var(--blue-bg);--c-fg:var(--blue-fg)}
+[data-c="green"]{--c-bg:var(--green-bg);--c-fg:var(--green-fg)}
+[data-c="amber"]{--c-bg:var(--amber-bg);--c-fg:var(--amber-fg)}
+[data-c="rose"]{--c-bg:var(--rose-bg);--c-fg:var(--rose-fg)}
+[data-c="violet"]{--c-bg:var(--violet-bg);--c-fg:var(--violet-fg)}
+[data-c="teal"]{--c-bg:var(--teal-bg);--c-fg:var(--teal-fg)}
+
+@media (max-width:760px){
+  .page{padding-inline:16px;padding-block:24px 40px;gap:16px}
+  .board{grid-template-columns:48px repeat(var(--days),minmax(120px,1fr));min-width:calc(48px + var(--days) * 120px)}
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <h1 id="title">Weekly Timetable</h1>
+  <div class="wrap" id="wrap"><div class="board" id="board"></div></div>
+</main>
+
+<script>
+(function () {
+  var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  var COLOURS = ['blue', 'green', 'amber', 'rose', 'violet', 'teal'];
+  var board = document.getElementById('board');
+  var wrap = document.getElementById('wrap');
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
+  function mins(t) {
+    var m = /^(\d{1,2})[:.](\d{2})$/.exec(String(t || '').trim());
+    return m ? +m[1] * 60 + +m[2] : null;
+  }
+  function hhmm(m) {
+    return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  }
+  function dayIndex(d) {
+    var k = String(d || '').trim().slice(0, 3).toLowerCase();
+    return DAYS.findIndex(function (n) { return n.toLowerCase() === k; });
+  }
+
+  var data;
+  try {
+    data = JSON.parse(document.getElementById('timetable').textContent);
+  } catch (e) {
+    wrap.replaceChildren(el('p', 'msg', 'The timetable data has a typo: ' + e.message + '. Look for a missing comma, quote or bracket.'));
+    return;
+  }
+
+  var title = data.title || 'Weekly Timetable';
+  document.getElementById('title').textContent = title;
+  document.title = title;
+
+  /* Clean up lessons and give each subject one colour */
+  var colourOf = {}, n = 0;
+  var lessons = (data.lessons || []).map(function (l) {
+    var s = mins(l.start), e = mins(l.end);
+    return { d: dayIndex(l.day), s: s, e: e > s ? e : s + 60, title: String(l.title || ''), info: l.info || '', colour: l.colour };
+  }).filter(function (l) { return l.d > -1 && l.s != null && l.title; });
+  lessons.forEach(function (l) {
+    var k = l.title.toLowerCase();
+    if (!colourOf[k]) colourOf[k] = COLOURS.indexOf(l.colour) > -1 ? l.colour : COLOURS[n++ % COLOURS.length];
+    l.c = colourOf[k];
+  });
+
+  /* Mon–Fri always, weekend only if used; hours fitted to the lessons */
+  var days = [0, 1, 2, 3, 4];
+  lessons.forEach(function (l) { if (days.indexOf(l.d) < 0) days.push(l.d); });
+  days.sort();
+  var r0 = lessons.length ? Math.floor(Math.min.apply(null, lessons.map(function (l) { return l.s; })) / 60) * 60 : 540;
+  var r1 = lessons.length ? Math.ceil(Math.max.apply(null, lessons.map(function (l) { return l.e; })) / 60) * 60 : 1020;
+  var at = function (m) { return 'calc(' + (m - r0) / 60 + ' * var(--hour))'; };
+
+  var today = (new Date().getDay() + 6) % 7;
+  board.style.setProperty('--days', days.length);
+  board.style.setProperty('--h', at(r1));
+
+  board.append(el('div', 'corner'));
+  days.forEach(function (d) {
+    var h = el('div', 'head' + (d === today ? ' today' : ''), DAYS[d]);
+    if (d === today) h.append(el('span', 'pill', 'Today'));
+    board.append(h);
+  });
+
+  var times = el('div', 'times');
+  for (var m = r0; m < r1; m += 60) {
+    var t = el('span', '', hhmm(m));
+    t.style.top = 'calc(' + at(m) + ' + 5px)';
+    times.append(t);
+  }
+  board.append(times);
+
+  var todayCol = null;
+  days.forEach(function (d) {
+    var col = el('div', 'col' + (d === today ? ' today' : ''));
+    if (d === today) todayCol = col;
+    var list = lessons.filter(function (l) { return l.d === d; }).sort(function (a, b) { return a.s - b.s; });
+
+    /* Overlapping lessons sit side by side */
+    var group = [], groupEnd = -1;
+    function place() {
+      var lanes = [];
+      group.forEach(function (l) {
+        var i = lanes.findIndex(function (end) { return end <= l.s; });
+        if (i < 0) { i = lanes.length; lanes.push(l.e); } else lanes[i] = l.e;
+        l.lane = i;
+      });
+      group.forEach(function (l) { l.lanes = lanes.length; });
+      group = [];
+    }
+    list.forEach(function (l) {
+      if (group.length && l.s >= groupEnd) place();
+      group.push(l);
+      groupEnd = Math.max(groupEnd, l.e);
+    });
+    if (group.length) place();
+
+    list.forEach(function (l) {
+      var card = el('article', 'lesson' + (l.e - l.s < 50 ? ' short' : ''));
+      card.dataset.c = l.c;
+      card.style.top = 'calc(' + at(l.s) + ' + 2px)';
+      card.style.height = 'calc(' + (l.e - l.s) / 60 + ' * var(--hour) - 4px)';
+      card.style.left = 'calc(' + (l.lane / l.lanes) * 100 + '% + 4px)';
+      card.style.width = 'calc(' + 100 / l.lanes + '% - 8px)';
+      card.title = l.title + '\n' + hhmm(l.s) + '–' + hhmm(l.e) + (l.info ? '\n' + l.info : '');
+      card.append(el('time', '', hhmm(l.s) + '–' + hhmm(l.e)), el('strong', '', l.title));
+      if (l.info && l.e - l.s >= 50) card.append(el('span', '', l.info));
+      col.append(card);
+    });
+    board.append(col);
+  });
+
+  /* Red line at the current time, refreshed every minute */
+  function placeNow() {
+    var old = board.querySelector('.now');
+    if (old) old.remove();
+    var d = new Date(), m = d.getHours() * 60 + d.getMinutes();
+    if (!todayCol || m < r0 || m > r1) return;
+    var line = el('div', 'now');
+    line.style.top = 'calc(' + at(m) + ' - 1px)';
+    todayCol.append(line);
+  }
+  placeNow();
+  setInterval(placeNow, 60000);
+
+  /* On narrow screens, start scrolled to today */
+  if (todayCol && wrap.scrollWidth > wrap.clientWidth) wrap.scrollLeft = todayCol.offsetLeft - times.offsetWidth;
+})();
+</script>
+</body>
+</html>

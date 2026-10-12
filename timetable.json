@@ -1,0 +1,12 @@
+{
+  "title": "Weekly Timetable",
+  "lessons": [
+    { "day": "Mon", "start": "09:00", "end": "11:00", "title": "Employability and Global Citizenship", "info": "CS2002 · AL207 Allen Building · Lecture" },
+    { "day": "Mon", "start": "16:00", "end": "18:00", "title": "Intermediate Chinese: Literacy", "info": "CL2201 · ME109 Media Factory" },
+    { "day": "Tue", "start": "15:00", "end": "17:00", "title": "Aspects of Chinese Society", "info": "CL2001 · VB120 Victoria Building" },
+    { "day": "Wed", "start": "09:00", "end": "11:00", "title": "Intermediate Chinese: Literacy", "info": "CL2201 · KM111 Kirkham Building" },
+    { "day": "Thu", "start": "13:00", "end": "15:00", "title": "Aspects of Chinese Society", "info": "CL2001 · HA344 Harrington Building" },
+    { "day": "Fri", "start": "09:00", "end": "11:00", "title": "Chinese Language and Society", "info": "CL2005 · GR273 Greenbank Building" },
+    { "day": "Fri", "start": "11:00", "end": "13:00", "title": "CT & CC Enc. in Asia Pacific", "info": "AI2001 · GR273 Greenbank Building" }
+  ]
+}
