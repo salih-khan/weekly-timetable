@@ -50,10 +50,11 @@
 
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
-.page{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:40px 56px;display:grid;gap:24px}
+.page{max-width:1440px;margin:0 auto;padding-inline:24px;padding-block:40px 56px;display:grid;gap:24px}
 h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.035em;line-height:1.05}
 
-.wrap{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow-x:auto}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}
+.wrap{min-width:0;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow-x:auto}
 .board{display:grid;grid-template-columns:56px repeat(var(--days),minmax(130px,1fr));min-width:calc(56px + var(--days) * 130px)}
 
 .corner{position:sticky;left:0;z-index:4;background:var(--surface);border-bottom:1px solid var(--line)}
@@ -87,6 +88,27 @@ h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.035e
 [data-c="violet"]{--c-bg:var(--violet-bg);--c-fg:var(--violet-fg)}
 [data-c="teal"]{--c-bg:var(--teal-bg);--c-fg:var(--teal-fg)}
 
+/* Assignments panel */
+.side{position:sticky;top:16px;display:grid;gap:12px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:18px}
+.side h2{margin:0;padding:2px 4px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.tasks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.task{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:start;padding:10px;border-radius:12px;background:var(--bg)}
+.task.past{opacity:.5}
+.cal{display:grid;justify-items:center;gap:3px;padding:7px 0 6px;border-radius:10px;background:var(--surface);border:1px solid var(--line);line-height:1}
+.cal b{font-size:18px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cal small{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.task strong{display:block;font-size:14px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.task p{margin:2px 0 0;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.desc{margin-top:6px;font-size:13px;line-height:1.45;white-space:pre-line;overflow-wrap:anywhere}
+.due{display:inline-block;margin-top:7px;padding:2px 8px;border-radius:999px;font-family:var(--mono);font-size:11px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.due.near{background:var(--amber-bg);color:var(--amber-fg);border-color:transparent}
+.due.soon{background:var(--rose-bg);color:var(--rose-fg);border-color:transparent}
+.none{padding:4px;font-size:13px;color:var(--muted)}
+
+@media (max-width:1100px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .side{position:static}
+}
 @media (max-width:760px){
   .page{padding-inline:16px;padding-block:24px 40px;gap:16px}
   .board{grid-template-columns:48px repeat(var(--days),minmax(120px,1fr));min-width:calc(48px + var(--days) * 120px)}
@@ -96,7 +118,13 @@ h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.035e
 <body>
 <main class="page">
   <h1 id="title">Weekly Timetable</h1>
-  <div class="wrap" id="wrap"><div class="board" id="board"></div></div>
+  <div class="layout">
+    <div class="wrap" id="wrap"><div class="board" id="board"></div></div>
+    <aside class="side">
+      <h2>Assignments</h2>
+      <ul class="tasks" id="tasks"></ul>
+    </aside>
+  </div>
 </main>
 
 <script>
@@ -126,8 +154,8 @@ h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.035e
 
   function fail(msg) { wrap.replaceChildren(el('p', 'msg', msg)); }
 
-fetch('timetable.json?v=' + Date.now(), { cache: 'no-store' })
-  .then(function (r) { if (!r.ok) throw new Error(); return r.text(); })
+  fetch('timetable.json?v=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error(); return r.text(); })
     .then(function (text) {
       var data;
       try { data = JSON.parse(text); }
@@ -238,6 +266,41 @@ fetch('timetable.json?v=' + Date.now(), { cache: 'no-store' })
 
     /* On narrow screens, start scrolled to today */
     if (todayCol && wrap.scrollWidth > wrap.clientWidth) wrap.scrollLeft = todayCol.offsetLeft - times.offsetWidth;
+
+    renderTasks(data.assignments || []);
+  }
+
+  /* Assignments: upcoming first (soonest at top), past ones faded at the bottom */
+  function renderTasks(list) {
+    var ul = document.getElementById('tasks');
+    var now = new Date(); now.setHours(0, 0, 0, 0);
+    var items = list.map(function (a) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(a.due || '').trim());
+      if (!m) return null;
+      var date = new Date(+m[1], +m[2] - 1, +m[3]);
+      return { title: String(a.title || 'Assignment'), info: a.info || '', desc: a.desc || '', date: date, days: Math.round((date - now) / 86400000) };
+    }).filter(Boolean).sort(function (a, b) {
+      if ((a.days < 0) !== (b.days < 0)) return a.days < 0 ? 1 : -1;
+      return a.days < 0 ? b.date - a.date : a.date - b.date;
+    });
+
+    ul.replaceChildren();
+    if (!items.length) { ul.append(el('li', 'none', 'Nothing due')); return; }
+
+    items.forEach(function (a) {
+      var li = el('li', 'task' + (a.days < 0 ? ' past' : ''));
+      var cal = el('div', 'cal');
+      cal.append(el('b', '', String(a.date.getDate())), el('small', '', a.date.toLocaleDateString('en-GB', { month: 'short' })));
+      var body = el('div');
+      body.append(el('strong', '', a.title));
+      if (a.info) body.append(el('p', '', a.info));
+      if (a.desc) body.append(el('div', 'desc', a.desc));
+      var when = a.days < 0 ? 'Passed' : a.days === 0 ? 'Due today' : a.days === 1 ? 'Due tomorrow' : 'In ' + a.days + ' days';
+      var weekday = a.date.toLocaleDateString('en-GB', { weekday: 'short' });
+      body.append(el('span', 'due' + (a.days >= 0 && a.days <= 7 ? ' soon' : a.days > 7 && a.days <= 21 ? ' near' : ''), weekday + ' · ' + when));
+      li.append(cal, body);
+      ul.append(li);
+    });
   }
 })();
 </script>
