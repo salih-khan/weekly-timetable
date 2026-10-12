@@ -5,25 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Weekly Lesson Timetable</title>
 
-<!-- ===== EDIT YOUR TIMETABLE HERE ===== -->
-<script type="application/json" id="timetable">
-{
-  "title": "Weekly Lessons",
-  "lessons": [
-    { "day": "Mon", "start": "09:30", "end": "11:00", "title": "Maths", "info": "Room 4" },
-    { "day": "Mon", "start": "13:00", "end": "14:00", "title": "English", "info": "Room 2" },
-    { "day": "Tue", "start": "10:00", "end": "11:30", "title": "Science", "info": "Lab 1" },
-    { "day": "Tue", "start": "15:00", "end": "16:00", "title": "Art", "info": "Studio" },
-    { "day": "Wed", "start": "09:30", "end": "11:00", "title": "Maths", "info": "Room 4" },
-    { "day": "Wed", "start": "14:00", "end": "15:30", "title": "History", "info": "Room 3" },
-    { "day": "Thu", "start": "11:00", "end": "12:00", "title": "English", "info": "Room 2" },
-    { "day": "Thu", "start": "16:00", "end": "17:30", "title": "Coding Club", "info": "IT Suite" },
-    { "day": "Fri", "start": "10:00", "end": "11:30", "title": "Science", "info": "Lab 1" }
-  ]
-}
-</script>
-<!-- ===================================== -->
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&display=swap">
@@ -143,112 +124,121 @@ h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.035e
     return DAYS.findIndex(function (n) { return n.toLowerCase() === k; });
   }
 
-  var data;
-  try {
-    data = JSON.parse(document.getElementById('timetable').textContent);
-  } catch (e) {
-    wrap.replaceChildren(el('p', 'msg', 'The timetable data has a typo: ' + e.message + '. Look for a missing comma, quote or bracket.'));
-    return;
-  }
+  function fail(msg) { wrap.replaceChildren(el('p', 'msg', msg)); }
 
-  var title = data.title || 'Weekly Timetable';
-  document.getElementById('title').textContent = title;
-  document.title = title;
+  fetch('timetable.json', { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error(); return r.text(); })
+    .then(function (text) {
+      var data;
+      try { data = JSON.parse(text); }
+      catch (e) { return fail('timetable.json has a typo: ' + e.message + '. Look for a missing comma, quote or bracket.'); }
+      build(data);
+    }, function () {
+      fail(location.protocol === 'file:'
+        ? 'Browsers won’t load timetable.json when this page is opened straight from a folder. Put both files on a host, or run a local server in the folder (e.g. npx serve).'
+        : 'Couldn’t find timetable.json. Put it in the same folder as this page.');
+    });
 
-  /* Clean up lessons and give each subject one colour */
-  var colourOf = {}, n = 0;
-  var lessons = (data.lessons || []).map(function (l) {
-    var s = mins(l.start), e = mins(l.end);
-    return { d: dayIndex(l.day), s: s, e: e > s ? e : s + 60, title: String(l.title || ''), info: l.info || '', colour: l.colour };
-  }).filter(function (l) { return l.d > -1 && l.s != null && l.title; });
-  lessons.forEach(function (l) {
-    var k = l.title.toLowerCase();
-    if (!colourOf[k]) colourOf[k] = COLOURS.indexOf(l.colour) > -1 ? l.colour : COLOURS[n++ % COLOURS.length];
-    l.c = colourOf[k];
-  });
+  function build(data) {
+    var title = data.title || 'Weekly Timetable';
+    document.getElementById('title').textContent = title;
+    document.title = title;
 
-  /* Mon–Fri always, weekend only if used; hours fitted to the lessons */
-  var days = [0, 1, 2, 3, 4];
-  lessons.forEach(function (l) { if (days.indexOf(l.d) < 0) days.push(l.d); });
-  days.sort();
-  var r0 = lessons.length ? Math.floor(Math.min.apply(null, lessons.map(function (l) { return l.s; })) / 60) * 60 : 540;
-  var r1 = lessons.length ? Math.ceil(Math.max.apply(null, lessons.map(function (l) { return l.e; })) / 60) * 60 : 1020;
-  var at = function (m) { return 'calc(' + (m - r0) / 60 + ' * var(--hour))'; };
+    /* Clean up lessons and give each subject one colour */
+    var colourOf = {}, n = 0;
+    var lessons = (data.lessons || []).map(function (l) {
+      var s = mins(l.start), e = mins(l.end);
+      return { d: dayIndex(l.day), s: s, e: e > s ? e : s + 60, title: String(l.title || ''), info: l.info || '', colour: l.colour };
+    }).filter(function (l) { return l.d > -1 && l.s != null && l.title; });
+    lessons.forEach(function (l) {
+      var k = l.title.toLowerCase();
+      if (!colourOf[k]) colourOf[k] = COLOURS.indexOf(l.colour) > -1 ? l.colour : COLOURS[n++ % COLOURS.length];
+      l.c = colourOf[k];
+    });
 
-  var today = (new Date().getDay() + 6) % 7;
-  board.style.setProperty('--days', days.length);
-  board.style.setProperty('--h', at(r1));
+    /* Mon–Fri always, weekend only if used; hours fitted to the lessons */
+    var days = [0, 1, 2, 3, 4];
+    lessons.forEach(function (l) { if (days.indexOf(l.d) < 0) days.push(l.d); });
+    days.sort();
+    var r0 = lessons.length ? Math.floor(Math.min.apply(null, lessons.map(function (l) { return l.s; })) / 60) * 60 : 540;
+    var r1 = lessons.length ? Math.ceil(Math.max.apply(null, lessons.map(function (l) { return l.e; })) / 60) * 60 : 1020;
+    var at = function (m) { return 'calc(' + (m - r0) / 60 + ' * var(--hour))'; };
 
-  board.append(el('div', 'corner'));
-  days.forEach(function (d) {
-    var h = el('div', 'head' + (d === today ? ' today' : ''), DAYS[d]);
-    if (d === today) h.append(el('span', 'pill', 'Today'));
-    board.append(h);
-  });
+    var today = (new Date().getDay() + 6) % 7;
+    board.style.setProperty('--days', days.length);
+    board.style.setProperty('--h', at(r1));
 
-  var times = el('div', 'times');
-  for (var m = r0; m < r1; m += 60) {
-    var t = el('span', '', hhmm(m));
-    t.style.top = 'calc(' + at(m) + ' + 5px)';
-    times.append(t);
-  }
-  board.append(times);
+    board.append(el('div', 'corner'));
+    days.forEach(function (d) {
+      var h = el('div', 'head' + (d === today ? ' today' : ''), DAYS[d]);
+      if (d === today) h.append(el('span', 'pill', 'Today'));
+      board.append(h);
+    });
 
-  var todayCol = null;
-  days.forEach(function (d) {
-    var col = el('div', 'col' + (d === today ? ' today' : ''));
-    if (d === today) todayCol = col;
-    var list = lessons.filter(function (l) { return l.d === d; }).sort(function (a, b) { return a.s - b.s; });
-
-    /* Overlapping lessons sit side by side */
-    var group = [], groupEnd = -1;
-    function place() {
-      var lanes = [];
-      group.forEach(function (l) {
-        var i = lanes.findIndex(function (end) { return end <= l.s; });
-        if (i < 0) { i = lanes.length; lanes.push(l.e); } else lanes[i] = l.e;
-        l.lane = i;
-      });
-      group.forEach(function (l) { l.lanes = lanes.length; });
-      group = [];
+    var times = el('div', 'times');
+    for (var m = r0; m < r1; m += 60) {
+      var t = el('span', '', hhmm(m));
+      t.style.top = 'calc(' + at(m) + ' + 5px)';
+      times.append(t);
     }
-    list.forEach(function (l) {
-      if (group.length && l.s >= groupEnd) place();
-      group.push(l);
-      groupEnd = Math.max(groupEnd, l.e);
-    });
-    if (group.length) place();
+    board.append(times);
 
-    list.forEach(function (l) {
-      var card = el('article', 'lesson' + (l.e - l.s < 50 ? ' short' : ''));
-      card.dataset.c = l.c;
-      card.style.top = 'calc(' + at(l.s) + ' + 2px)';
-      card.style.height = 'calc(' + (l.e - l.s) / 60 + ' * var(--hour) - 4px)';
-      card.style.left = 'calc(' + (l.lane / l.lanes) * 100 + '% + 4px)';
-      card.style.width = 'calc(' + 100 / l.lanes + '% - 8px)';
-      card.title = l.title + '\n' + hhmm(l.s) + '–' + hhmm(l.e) + (l.info ? '\n' + l.info : '');
-      card.append(el('time', '', hhmm(l.s) + '–' + hhmm(l.e)), el('strong', '', l.title));
-      if (l.info && l.e - l.s >= 50) card.append(el('span', '', l.info));
-      col.append(card);
-    });
-    board.append(col);
-  });
+    var todayCol = null;
+    days.forEach(function (d) {
+      var col = el('div', 'col' + (d === today ? ' today' : ''));
+      if (d === today) todayCol = col;
+      var list = lessons.filter(function (l) { return l.d === d; }).sort(function (a, b) { return a.s - b.s; });
 
-  /* Red line at the current time, refreshed every minute */
-  function placeNow() {
-    var old = board.querySelector('.now');
-    if (old) old.remove();
-    var d = new Date(), m = d.getHours() * 60 + d.getMinutes();
-    if (!todayCol || m < r0 || m > r1) return;
-    var line = el('div', 'now');
-    line.style.top = 'calc(' + at(m) + ' - 1px)';
-    todayCol.append(line);
+      /* Overlapping lessons sit side by side */
+      var group = [], groupEnd = -1;
+      function place() {
+        var lanes = [];
+        group.forEach(function (l) {
+          var i = lanes.findIndex(function (end) { return end <= l.s; });
+          if (i < 0) { i = lanes.length; lanes.push(l.e); } else lanes[i] = l.e;
+          l.lane = i;
+        });
+        group.forEach(function (l) { l.lanes = lanes.length; });
+        group = [];
+      }
+      list.forEach(function (l) {
+        if (group.length && l.s >= groupEnd) place();
+        group.push(l);
+        groupEnd = Math.max(groupEnd, l.e);
+      });
+      if (group.length) place();
+
+      list.forEach(function (l) {
+        var card = el('article', 'lesson' + (l.e - l.s < 50 ? ' short' : ''));
+        card.dataset.c = l.c;
+        card.style.top = 'calc(' + at(l.s) + ' + 2px)';
+        card.style.height = 'calc(' + (l.e - l.s) / 60 + ' * var(--hour) - 4px)';
+        card.style.left = 'calc(' + (l.lane / l.lanes) * 100 + '% + 4px)';
+        card.style.width = 'calc(' + 100 / l.lanes + '% - 8px)';
+        card.title = l.title + '\n' + hhmm(l.s) + '–' + hhmm(l.e) + (l.info ? '\n' + l.info : '');
+        card.append(el('time', '', hhmm(l.s) + '–' + hhmm(l.e)), el('strong', '', l.title));
+        if (l.info && l.e - l.s >= 50) card.append(el('span', '', l.info));
+        col.append(card);
+      });
+      board.append(col);
+    });
+
+    /* Red line at the current time, refreshed every minute */
+    function placeNow() {
+      var old = board.querySelector('.now');
+      if (old) old.remove();
+      var d = new Date(), m = d.getHours() * 60 + d.getMinutes();
+      if (!todayCol || m < r0 || m > r1) return;
+      var line = el('div', 'now');
+      line.style.top = 'calc(' + at(m) + ' - 1px)';
+      todayCol.append(line);
+    }
+    placeNow();
+    setInterval(placeNow, 60000);
+
+    /* On narrow screens, start scrolled to today */
+    if (todayCol && wrap.scrollWidth > wrap.clientWidth) wrap.scrollLeft = todayCol.offsetLeft - times.offsetWidth;
   }
-  placeNow();
-  setInterval(placeNow, 60000);
-
-  /* On narrow screens, start scrolled to today */
-  if (todayCol && wrap.scrollWidth > wrap.clientWidth) wrap.scrollLeft = todayCol.offsetLeft - times.offsetWidth;
 })();
 </script>
 </body>
