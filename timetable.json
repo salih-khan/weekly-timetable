@@ -26,6 +26,7 @@
     { "due": "2027-01-01", "title": "Portfolio", "info": "Individual", "desc": "To be taken." }
   ],
   "results": [
-    { "title": "Weekly test results", "url": "https://docs.google.com/spreadsheets/d/1LfIfxX0ny6RUYYmkU4HmuQPNJhmbLkX83CiIphh_WxY/edit?usp=sharing" }
+    { "title": "Scores", "sheet": "Results", "url": "https://docs.google.com/spreadsheets/d/1LfIfxX0ny6RUYYmkU4HmuQPNJhmbLkX83CiIphh_WxY/edit?usp=sharing" },
+    { "title": "Test files", "sheet": "Files", "url": "https://docs.google.com/spreadsheets/d/1LfIfxX0ny6RUYYmkU4HmuQPNJhmbLkX83CiIphh_WxY/edit?usp=sharing" }
   ]
 }

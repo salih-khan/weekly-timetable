@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Weekly Lesson Timetable</title>
+<link rel="preconnect" href="https://docs.google.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&display=swap">
@@ -133,13 +134,69 @@ h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.035e
 .none{padding:4px;font-size:13px;color:var(--muted)}
 
 /* Results */
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips{padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;width:max-content;max-width:100%}
+.chip{height:40px;padding:0 20px;border-radius:10px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:550;cursor:pointer}
 .chip:hover{color:var(--ink)}
-.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
 .clip{overflow:hidden}
 .frame{display:block;width:100%;height:clamp(460px,72vh,960px);border:0;background:var(--surface)}
 .card-foot{margin:0;padding:10px 18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.res-head{display:flex;align-items:center;gap:8px;padding-inline:2px}
+.res-head h2{flex:1;min-width:0;margin:0;font-size:18px;font-weight:650;letter-spacing:-.02em;overflow-wrap:anywhere}
+.sync{font-size:12px;color:var(--muted);white-space:nowrap}
+.sync.busy::before{content:"";display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:var(--muted);vertical-align:1px;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.sync.busy::before{animation:none}}
+
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.person{display:grid;gap:14px;padding:16px 18px}
+.pname{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;min-width:0}
+.pname i,.hname i{flex:none;width:10px;height:10px;border-radius:3px;background:var(--p)}
+.pname small{font-size:13px;font-weight:400;color:var(--muted)}
+.pbig{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.pbig b{font-size:36px;font-weight:700;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums}
+.pbig b span{margin-left:1px;font-size:18px;font-weight:500;color:var(--muted)}
+.plabel{margin-top:6px;font-size:12px;color:var(--muted)}
+.spark{flex:none;width:132px;height:40px;overflow:visible}
+.spark .base{stroke:var(--line);stroke-width:1}
+.spark .ar{fill:var(--pb)}
+.spark .ln{fill:none;stroke:var(--p);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.spark .dot{fill:var(--p)}
+.pstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding-top:12px;border-top:1px solid var(--line-soft)}
+.pstats dt{font-size:11.5px;color:var(--muted)}
+.pstats dd{margin:2px 0 0;font-family:var(--mono);font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
+.pstats small{margin-left:5px;font-size:11px}
+.pstats .up{color:var(--green-fg)}
+.pstats .down{color:var(--rose-fg)}
+
+.weeks{display:grid}
+.weeks .row{display:grid;grid-template-columns:minmax(170px,1.15fr) repeat(var(--n,3),minmax(0,1fr));gap:16px;align-items:start;padding:14px 18px;border-top:1px solid var(--line-soft)}
+.weeks .headrow{padding-block:12px;border-top:0;border-bottom:1px solid var(--line);font-size:12px;font-weight:500;color:var(--muted)}
+.weeks .headrow + .row{border-top:0}
+.hname{display:flex;align-items:center;gap:7px;color:var(--ink);font-size:13px;font-weight:600}
+.wmeta{display:grid;gap:2px;min-width:0}
+.wk{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.wmeta strong{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.wsub{font-size:12.5px;color:var(--muted)}
+.score{display:grid;gap:6px;min-width:0}
+.score .who{display:none;font-size:12px;font-weight:600}
+.score .line{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.score b{font-size:17px;font-weight:650;font-variant-numeric:tabular-nums}
+.score b small{font-size:12px;font-weight:400;color:var(--muted)}
+.pct{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.topchip{font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--pb);color:var(--p)}
+.bar{height:4px;border-radius:2px;background:var(--line-soft);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:2px;background:var(--p)}
+.note{font-size:12.5px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
+.blank{font-size:13px;color:var(--muted)}
+.weeks-foot{margin:0;padding:12px 18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+
+.tablewrap{overflow-x:auto}
+.gtable{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+.gtable th,.gtable td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line-soft);vertical-align:top}
+.gtable th{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;border-bottom-color:var(--line)}
+.gtable tr:last-child td{border-bottom:0}
 
 /* Files */
 .files{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;align-items:start}
@@ -159,6 +216,12 @@ h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.035e
 .fname:hover{text-decoration:underline;text-underline-offset:3px}
 .fmeta{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
 .factions{display:flex;gap:6px}
+.fname.plain{cursor:default}
+.fname.plain:hover{text-decoration:none}
+.fwhat{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.fmetas{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:3px}
+.tpill{font-size:11px;font-weight:500;padding:1px 8px;border-radius:999px;background:var(--c-bg);color:var(--c-fg)}
+.missing{font-size:12px;color:var(--muted);white-space:nowrap}
 
 /* Viewer */
 dialog.viewer{padding:0;border:0;border-radius:18px;background:var(--surface);color:var(--ink);width:min(1100px,calc(100vw - 32px));height:min(88vh,1000px);max-width:none;max-height:none;overflow:hidden;box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}
@@ -193,6 +256,16 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
   dialog.viewer{width:100vw;height:100%;max-height:100%;border-radius:0}
   .vhead .btn span{display:none}
   .vhead .btn{width:32px;padding:0}
+  .weeks .row{grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:12px 10px;padding:14px 16px}
+  .weeks .wmeta{grid-column:1/-1}
+  .weeks .headrow{display:none}
+  .weeks .headrow + .row{border-top:0}
+  .score .who{display:block;color:var(--p)}
+  .res-head{flex-wrap:wrap}
+  .res-head h2{flex-basis:100%}
+  .sync{flex:1}
+  .chips{width:100%}
+  .chip{flex:1;padding-inline:10px}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
@@ -326,6 +399,7 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
       document.title = title;
       buildWeek();
       renderTasks(DATA.assignments || []);
+      prefetchResults();
       start();
     }, function () {
       weekError(location.protocol === 'file:'
@@ -472,7 +546,10 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
     });
   }
 
-  /* ---------- Results (Google Sheets, Docs, Slides or Drive) ---------- */
+  /* ---------- Results ---------- */
+  /* Google Sheets are read as data and drawn as the hub's own scoreboard or table; other Google files are embedded */
+  var PCOL = ['blue', 'rose', 'teal', 'violet', 'amber', 'green'];
+
   function googleEmbed(u) {
     var m;
     if (/\/d\/e\//.test(u)) return /pubhtml/.test(u) ? u + (u.indexOf('?') > -1 ? '&' : '?') + 'widget=true&headers=false' : u;
@@ -482,12 +559,50 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
     return u;
   }
   function openLabel(u) {
-    if (/spreadsheets/.test(u)) return 'Open in Sheets';
+    if (/spreadsheets/.test(u)) return 'Edit in Sheets';
     if (/\/document\//.test(u)) return 'Open in Docs';
     if (/presentation/.test(u)) return 'Open in Slides';
     if (/drive\.google/.test(u)) return 'Open in Drive';
     return 'Open';
   }
+  function sheetId(u) {
+    var m = /docs\.google\.com\/spreadsheets\/d\/([\w-]+)/.exec(u);
+    return m && !/\/d\/e\//.test(u) ? m[1] : null;
+  }
+  function csvUrl(r) {
+    var q = 'tqx=out:csv', gid = /[#&?]gid=(\d+)/.exec(r.url);
+    if (r.sheet) q += '&sheet=' + encodeURIComponent(r.sheet);
+    else if (gid) q += '&gid=' + gid[1];
+    return 'https://docs.google.com/spreadsheets/d/' + sheetId(r.url) + '/gviz/tq?' + q;
+  }
+  function parseCSV(text) {
+    var rows = [], row = [], cell = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) {
+        if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+        else cell += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === ',') { row.push(cell); cell = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); rows.push(row); row = []; cell = '';
+      } else cell += ch;
+    }
+    if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+    return rows.map(function (r) { return r.map(function (c) { return c.trim(); }); });
+  }
+  function num(v) {
+    var n = parseFloat(String(v == null ? '' : v).replace(/[,%\s]/g, ''));
+    return isFinite(n) ? n : null;
+  }
+  function pctText(v) { return v == null ? '–' : Math.round(v) + '%'; }
+  function fmtNum(n) { return String(Math.round(n * 10) / 10); }
+  function paint(node, colour) {
+    node.style.setProperty('--p', 'var(--' + colour + '-fg)');
+    node.style.setProperty('--pb', 'var(--' + colour + '-bg)');
+  }
+
   function renderResults() {
     var box = $('results');
     var list = (DATA.results || []).filter(function (r) { return r && r.url; });
@@ -496,30 +611,15 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
       box.append(emptyCard(
         'No results linked yet',
         'Add a Google Sheet to "results" in timetable.json and it shows here.',
-        '"results": [\n  { "title": "HSK mock scores", "url": "https://docs.google.com/spreadsheets/d/..." }\n]',
-        'Set the sheet’s sharing to “Anyone with the link” so it can show here.'));
+        '"results": [\n  { "title": "Weekly test results", "url": "https://docs.google.com/spreadsheets/d/..." }\n]',
+        'Set the sheet’s sharing to “Anyone with the link” so the hub can read it.'));
       return;
     }
-
-    var chips = el('div', 'chips');
-    var card = el('div', 'card clip');
-    var head = el('div', 'card-head');
-    var h = el('h2');
-    var open = newTab(btn('', 'open', 'Open', '#'));
-    head.append(h, open);
-    var frame = el('iframe', 'frame');
-    frame.setAttribute('allow', 'fullscreen');
-    card.append(head, frame, el('p', 'card-foot', 'Blank or asking for access? Share the file as “Anyone with the link”.'));
-
+    var chips = el('div', 'chips'), view = el('div', 'stack');
     function pick(i) {
-      var r = list[i];
-      h.textContent = r.title || 'Untitled';
-      open.href = r.url;
-      open.querySelector('span').textContent = openLabel(r.url);
-      frame.title = r.title || 'Google file';
-      frame.src = googleEmbed(r.url);
       Array.prototype.forEach.call(chips.children, function (c, j) { c.setAttribute('aria-pressed', String(j === i)); });
       store('hub-result', String(i));
+      showResult(list[i], view);
     }
     if (list.length > 1) {
       list.forEach(function (r, i) {
@@ -530,9 +630,331 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
       });
       box.append(chips);
     }
-    box.append(card);
+    box.append(view);
     var saved = parseInt(recall('hub-result'), 10) || 0;
     pick(saved < list.length ? saved : 0);
+  }
+
+  /* Sheet data is kept on the device so results show instantly, then checked against Google in the background */
+  var SHEETS = {};
+  function sheetState(key) {
+    var st = SHEETS[key];
+    if (!st) {
+      st = SHEETS[key] = { text: null, time: 0, inflight: null };
+      try {
+        var c = JSON.parse(localStorage.getItem('hub-sheet:' + key));
+        if (c && c.text) { st.text = c.text; st.time = c.time || 0; }
+      } catch (e) {}
+    }
+    return st;
+  }
+  function loadSheet(key) {
+    var st = sheetState(key);
+    if (st.inflight) return st.inflight;
+    st.inflight = fetch(key, { cache: 'no-store' })
+      .then(function (res) { if (!res.ok) throw new Error(); return res.text(); })
+      .then(function (text) {
+        if (/^\s*</.test(text)) throw new Error();
+        var changed = text !== st.text;
+        st.text = text;
+        st.time = Date.now();
+        st.inflight = null;
+        try { localStorage.setItem('hub-sheet:' + key, JSON.stringify({ text: text, time: st.time })); } catch (e) {}
+        return changed;
+      }, function (e) { st.inflight = null; throw e; });
+    return st.inflight;
+  }
+  function prefetchResults() {
+    (DATA.results || []).forEach(function (r) {
+      if (r && r.url && sheetId(r.url) && r.view !== 'embed') loadSheet(csvUrl(r)).catch(function () {});
+    });
+  }
+  function clock(t) { return new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); }
+
+  var CURRENT = null;
+  function showResult(r, view, force) {
+    if (!sheetId(r.url) || r.view === 'embed') { CURRENT = null; view.replaceChildren(embedCard(r)); return; }
+    var key = csvUrl(r), st = sheetState(key), title = r.title || 'Results';
+    var status = el('span', 'sync');
+    CURRENT = { r: r, view: view, key: key };
+    view.dataset.key = key;
+
+    function draw() {
+      var rows = parseCSV(st.text);
+      view.replaceChildren.apply(view, scoreboard(r, rows, view, status) || fileSheet(r, rows, view, status) || genericTable(r, rows, view, status));
+    }
+    function say(text, busy) { status.textContent = text; status.classList.toggle('busy', !!busy); }
+
+    if (st.text != null) { draw(); say('Updating\u2026', true); }
+    else view.replaceChildren(el('p', 'msg card', 'Loading ' + title + '\u2026'));
+
+    var check = st.inflight || force || !st.text || Date.now() - st.time > 10000
+      ? loadSheet(key) : Promise.resolve(false);
+    check.then(function (changed) {
+      if (view.dataset.key !== key) return;
+      if (changed || !status.isConnected) draw();
+      say('Updated ' + clock(st.time));
+    }, function () {
+      if (view.dataset.key !== key) return;
+      if (st.text != null) { say('Couldn\u2019t update \u00b7 showing ' + clock(st.time)); return; }
+      var card = emptyCard('Couldn\u2019t read ' + title,
+        'Check the sheet is shared as \u201cAnyone with the link\u201d, then refresh.');
+      var again = btn('', 'refresh', 'Try again');
+      again.onclick = function () { showResult(r, view, true); };
+      card.firstChild.append(again);
+      view.replaceChildren(card);
+    });
+  }
+
+  /* Coming back to the tab (e.g. after editing the sheet) refreshes the results */
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible' || !CURRENT || $('panel-results').hidden) return;
+    if (Date.now() - sheetState(CURRENT.key).time > 15000) showResult(CURRENT.r, CURRENT.view, true);
+  });
+
+  function resultsHead(r, view, status) {
+    var head = el('div', 'res-head');
+    var refresh = btn('icon', 'refresh');
+    refresh.title = 'Refresh';
+    refresh.setAttribute('aria-label', 'Refresh results');
+    refresh.onclick = function () { showResult(r, view, true); };
+    head.append(el('h2', '', r.title || 'Results'));
+    if (status) head.append(status);
+    head.append(refresh, newTab(btn('', 'open', openLabel(r.url), r.url)));
+    return head;
+  }
+
+  function embedCard(r) {
+    var card = el('div', 'card clip'), head = el('div', 'card-head');
+    head.append(el('h2', '', r.title || 'Untitled'), newTab(btn('', 'open', openLabel(r.url), r.url)));
+    var f = el('iframe', 'frame');
+    f.title = r.title || 'Google file';
+    f.src = googleEmbed(r.url);
+    f.setAttribute('allow', 'fullscreen');
+    card.append(head, f, el('p', 'card-foot', 'Blank or asking for access? Share the file as “Anyone with the link”.'));
+    return card;
+  }
+
+  /* A sheet with "Score" columns per person becomes a scoreboard */
+  function scoreboard(r, rows, view, status) {
+    if (rows.length < 2) return null;
+    var head = rows[0], people = [];
+    head.forEach(function (h, c) {
+      if (!/score\s*$/i.test(h)) return;
+      var raw = h.replace(/score\s*$/i, '').trim();
+      var m = /^(.*?)\s*[(（]\s*(.+?)\s*[)）]\s*$/.exec(raw);
+      var p = { name: (m ? m[1] : raw) || 'Person ' + (people.length + 1), alt: m ? m[2] : '', score: c, pct: -1, note: -1 };
+      for (var k = c + 1; k < head.length && !/score\s*$/i.test(head[k]); k++) {
+        if (p.pct < 0 && /%|percent/i.test(head[k])) p.pct = k;
+        else if (p.note < 0 && /note|comment/i.test(head[k])) p.note = k;
+      }
+      p.colour = PCOL[people.length % PCOL.length];
+      people.push(p);
+    });
+    if (!people.length) return null;
+
+    var firstScore = people[0].score;
+    function find(re) { for (var c = 1; c < firstScore; c++) if (re.test(head[c])) return c; return -1; }
+    var cDate = find(/date/i), cTest = find(/test|topic/i), cMax = find(/max|out of|total/i);
+
+    var weeks = rows.slice(1).filter(function (row) {
+      return row[0] && !/^(average|avg|best|tests?\s*done|total|mean)/i.test(row[0]);
+    }).map(function (row) {
+      var max = cMax > -1 ? num(row[cMax]) : null;
+      return {
+        label: row[0], date: cDate > -1 ? row[cDate] : '', test: cTest > -1 ? row[cTest] : '', max: max,
+        marks: people.map(function (p) {
+          var s = num(row[p.score]);
+          var pc = s == null ? null : max ? s / max * 100 : p.pct > -1 ? num(row[p.pct]) : null;
+          return { score: s, pct: pc, note: p.note > -1 ? row[p.note] || '' : '' };
+        })
+      };
+    });
+    var taken = weeks.filter(function (w) { return w.marks.some(function (m) { return m.score != null; }); });
+    var upcoming = weeks.filter(function (w) { return taken.indexOf(w) < 0; });
+
+    people.forEach(function (p, i) {
+      var v = taken.map(function (w) { return w.marks[i].pct; }).filter(function (x) { return x != null; });
+      p.pcts = v;
+      p.done = taken.filter(function (w) { return w.marks[i].score != null; }).length;
+      p.avg = v.length ? v.reduce(function (a, b) { return a + b; }, 0) / v.length : null;
+      p.best = v.length ? Math.max.apply(null, v) : null;
+      p.last = v.length ? v[v.length - 1] : null;
+      p.delta = v.length > 1 ? v[v.length - 1] - v[v.length - 2] : null;
+    });
+
+    var cards = el('div', 'people');
+    people.forEach(function (p) { cards.append(personCard(p)); });
+
+    var list = el('div', 'card weeks');
+    list.style.setProperty('--n', people.length);
+    var hr = el('div', 'row headrow');
+    hr.append(el('span', '', 'Test'));
+    people.forEach(function (p) {
+      var s = el('span', 'hname');
+      paint(s, p.colour);
+      s.append(el('i'), el('span', '', p.name));
+      hr.append(s);
+    });
+    list.append(hr);
+    taken.slice().reverse().forEach(function (w) { list.append(weekRow(w, people)); });
+    if (!taken.length) list.append(el('p', 'msg', 'No scores yet. Fill in the sheet and they’ll show here.'));
+    if (upcoming.length) list.append(el('p', 'weeks-foot', 'Next up: ' + upcoming[0].label + ' · ' + upcoming.length + (upcoming.length === 1 ? ' week' : ' weeks') + ' to go'));
+
+    return [resultsHead(r, view, status), cards, list];
+  }
+
+  function spark(v) {
+    if (v.length < 2) return '';
+    var W = 132, H = 40, pad = 4, lo = Math.min(50, Math.min.apply(null, v) - 5), hi = 100;
+    var x = function (i) { return pad + i * (W - pad * 2) / (v.length - 1); };
+    var y = function (p) { return pad + (hi - Math.max(lo, Math.min(hi, p))) / (hi - lo) * (H - pad * 2); };
+    var pts = v.map(function (p, i) { return x(i).toFixed(1) + ',' + y(p).toFixed(1); });
+    var last = pts[pts.length - 1].split(',');
+    return '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' +
+      '<line class="base" x1="0" x2="' + W + '" y1="' + (H - pad) + '" y2="' + (H - pad) + '"/>' +
+      '<polygon class="ar" points="' + x(0).toFixed(1) + ',' + (H - pad) + ' ' + pts.join(' ') + ' ' + x(v.length - 1).toFixed(1) + ',' + (H - pad) + '"/>' +
+      '<polyline class="ln" points="' + pts.join(' ') + '"/>' +
+      '<circle class="dot" cx="' + last[0] + '" cy="' + last[1] + '" r="3.5"/></svg>';
+  }
+
+  function personCard(p) {
+    var c = el('section', 'card person');
+    paint(c, p.colour);
+    var name = el('div', 'pname');
+    name.append(el('i'), el('span', '', p.name));
+    if (p.alt) name.append(el('small', '', p.alt));
+    var big = el('div', 'pbig'), left = el('div');
+    var b = el('b', '', p.avg == null ? '–' : String(Math.round(p.avg)));
+    if (p.avg != null) b.append(el('span', '', '%'));
+    left.append(b, el('div', 'plabel', 'Average'));
+    big.append(left);
+    big.insertAdjacentHTML('beforeend', spark(p.pcts));
+    var stats = el('dl', 'pstats');
+    function stat(label, value, extra) {
+      var d = el('div'), dd = el('dd', '', value);
+      if (extra) dd.append(extra);
+      d.append(el('dt', '', label), dd);
+      stats.append(d);
+    }
+    var delta = null;
+    if (p.delta != null && Math.round(p.delta) !== 0) {
+      delta = el('small', p.delta > 0 ? 'up' : 'down', (p.delta > 0 ? '+' : '−') + Math.abs(Math.round(p.delta)));
+    }
+    stat('Best', pctText(p.best));
+    stat('Latest', pctText(p.last), delta);
+    stat('Tests', String(p.done));
+    c.append(name, big, stats);
+    return c;
+  }
+
+  function weekRow(w, people) {
+    var row = el('div', 'row'), meta = el('div', 'wmeta');
+    meta.append(el('span', 'wk', w.label), el('strong', '', w.test || 'Test'));
+    var sub = [w.date, w.max != null ? 'out of ' + fmtNum(w.max) : ''].filter(Boolean).join(' · ');
+    if (sub) meta.append(el('span', 'wsub', sub));
+    row.append(meta);
+    var scored = w.marks.filter(function (m) { return m.pct != null; });
+    var best = scored.length ? Math.max.apply(null, scored.map(function (m) { return m.pct; })) : null;
+    w.marks.forEach(function (m, i) {
+      var cell = el('div', 'score');
+      paint(cell, people[i].colour);
+      cell.append(el('span', 'who', people[i].name));
+      if (m.score == null) { cell.append(el('span', 'blank', 'Not taken')); row.append(cell); return; }
+      var line = el('div', 'line'), b = el('b', '', fmtNum(m.score));
+      if (w.max != null) b.append(el('small', '', '/' + fmtNum(w.max)));
+      line.append(b);
+      if (m.pct != null) line.append(el('span', 'pct', pctText(m.pct)));
+      if (scored.length > 1 && m.pct === best) line.append(el('span', 'topchip', 'Top'));
+      cell.append(line);
+      if (m.pct != null) {
+        var bar = el('div', 'bar'), fill = el('i');
+        fill.style.width = Math.max(0, Math.min(100, m.pct)) + '%';
+        bar.append(fill);
+        cell.append(bar);
+      }
+      if (m.note) cell.append(el('span', 'note', m.note));
+      row.append(cell);
+    });
+    return row;
+  }
+
+  /* A sheet with a "File" column lists files; names open the matching file from the Files tab */
+  function fileSheet(r, rows, view, status) {
+    /* Header row = the row with a cell that is just "File"; fall back to a label ending in "File" */
+    var hi = -1, exact = function (c) { return /^files?( ?name)?$/i.test(c); }, loose = function (c) { return /\sfile$/i.test(c); };
+    var isFile = exact;
+    for (var i = 0; i < rows.length && hi < 0; i++) if (rows[i].some(exact)) hi = i;
+    if (hi < 0) { isFile = loose; for (i = 0; i < rows.length && hi < 0; i++) if (rows[i].some(loose)) hi = i; }
+    if (hi < 0) return null;
+    var head = rows[hi];
+    function col(re) { for (var c = 0; c < head.length; c++) if (re.test(head[c])) return c; return -1; }
+    var cFile = head.findIndex(isFile), cWeek = col(/(^|\s)week\s*$/i), cType = col(/(^|\s)type\s*$/i),
+        cWhat = col(/(what it is|description|about|notes?)\s*$/i);
+    var items = rows.slice(hi + 1).filter(function (row) { return row[cFile]; }).map(function (row) {
+      var week = cWeek > -1 ? row[cWeek] : '';
+      return { file: row[cFile], week: /^[\u2014\u2013-]*$/.test(week) ? '' : week,
+        type: cType > -1 ? row[cType] : '', what: cWhat > -1 ? row[cWhat] : '' };
+    });
+    if (!items.length) return [resultsHead(r, view, status), emptyCard('No files listed yet', 'Add rows in the sheet, then refresh.')];
+
+    var card = el('div', 'card'), list = el('ul', 'rows'), slots = [];
+    items.forEach(function (it) {
+      var li = el('li', 'file'), dot = it.file.lastIndexOf('.'), ext = dot > 0 ? it.file.slice(dot + 1).toLowerCase() : '';
+      var badge = el('span', 'badge', (ext || 'file').slice(0, 4));
+      badge.dataset.c = KIND[ext] || 'slate';
+      var info = el('div', 'finfo'), name = el('span', 'fname plain', it.file), meta = el('div', 'fmetas');
+      if (it.type) { var t = el('span', 'tpill', it.type); t.dataset.c = /extra/i.test(it.type) ? 'amber' : /official/i.test(it.type) ? 'blue' : 'slate'; meta.append(t); }
+      if (it.week) meta.append(el('span', 'fmeta', it.week));
+      info.append(name);
+      if (it.what) info.append(el('span', 'fwhat', it.what));
+      info.append(meta);
+      var acts = el('div', 'factions');
+      li.append(badge, info, acts);
+      list.append(li);
+      slots.push({ it: it, li: li, info: info, name: name, acts: acts });
+    });
+    card.append(list);
+
+    /* Link each row to the uploaded file with the same name */
+    fetchRepoFiles().then(function (folders) {
+      var byName = {};
+      folders.forEach(function (f) { f.files.forEach(function (x) { byName[x.base.toLowerCase()] = x; }); });
+      slots.forEach(function (s) {
+        var f = byName[s.it.file.toLowerCase()];
+        if (!f) { s.acts.replaceChildren(el('span', 'missing', 'Not uploaded')); return; }
+        var name = el('button', 'fname', s.it.file);
+        name.type = 'button';
+        name.onclick = function () { openFile(f); };
+        s.name.replaceWith(name);
+        var v = btn('', '', 'View');
+        v.onclick = function () { openFile(f); };
+        var d = btn('icon', 'download', '', f.url);
+        d.setAttribute('download', f.base);
+        d.setAttribute('aria-label', 'Download ' + f.base);
+        d.title = 'Download';
+        s.acts.replaceChildren(v, d);
+      });
+    }).catch(function () {});
+
+    return [resultsHead(r, view, status), card];
+  }
+
+  /* Any other sheet shows as a plain table */
+  function genericTable(r, rows, view, status) {
+    var body = rows.filter(function (row) { return row.some(Boolean); });
+    if (!body.length) return [resultsHead(r, view, status), emptyCard('This sheet is empty', 'Add some rows in Google Sheets, then refresh.')];
+    var card = el('div', 'card tablewrap'), table = el('table', 'gtable'), thead = el('thead'), tr = el('tr'), tb = el('tbody');
+    body[0].forEach(function (h) { tr.append(el('th', '', h)); });
+    thead.append(tr);
+    body.slice(1).forEach(function (row) {
+      var r2 = el('tr');
+      row.forEach(function (c) { r2.append(el('td', '', c)); });
+      tb.append(r2);
+    });
+    table.append(thead, tb);
+    card.append(table);
+    return [resultsHead(r, view, status), card];
   }
 
   /* ---------- Files (everything inside the repo's files/ folder) ---------- */
@@ -560,35 +982,40 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
   }
   function filesBox(node) { $('files').replaceChildren(node); }
 
-  function loadFiles() {
+  var FILES_P = null;
+  function fetchRepoFiles(force) {
+    if (FILES_P && !force) return FILES_P;
     FILES.repo = detectRepo();
-    if (!FILES.repo) {
-      filesBox(emptyCard('Files live in the GitHub repo',
-        'Open this page on its GitHub Pages address to browse them, or add "repo": "your-name/your-repo" to timetable.json.'));
-      return;
-    }
-    filesBox(el('p', 'msg card', 'Loading files…'));
+    if (!FILES.repo) return Promise.reject({ norepo: true });
     var api = 'https://api.github.com/repos/' + FILES.repo;
-    getJSON(api)
+    FILES_P = getJSON(api)
       .then(function (info) {
         FILES.branch = info.default_branch || 'main';
         return getJSON(api + '/git/trees/' + encodeURIComponent(FILES.branch) + '?recursive=1');
       })
-      .then(function (tree) {
-        FILES.folders = groupFiles(tree.tree || []);
-        renderFiles();
-      })
-      .catch(function (e) {
-        var msg = e.status === 403 || e.status === 429 ? 'GitHub allows 60 file checks an hour per network and they’re used up. Try again in a few minutes.'
-          : e.status === 404 ? 'Couldn’t find the repo ' + FILES.repo + '. It needs to be public.'
-          : e.status === 409 ? 'The repo is empty, so there are no files yet.'
-          : 'Couldn’t reach GitHub to list the files.';
-        var card = emptyCard('Files didn’t load', msg);
-        var retry = btn('', 'refresh', 'Try again');
-        retry.onclick = loadFiles;
-        card.firstChild.append(retry);
-        filesBox(card);
-      });
+      .then(function (tree) { FILES.folders = groupFiles(tree.tree || []); return FILES.folders; });
+    FILES_P.catch(function () { FILES_P = null; });
+    return FILES_P;
+  }
+
+  function loadFiles(force) {
+    if (!detectRepo()) {
+      filesBox(emptyCard('Files live in the GitHub repo',
+        'Open this page on its GitHub Pages address to browse them, or add "repo": "your-name/your-repo" to timetable.json.'));
+      return;
+    }
+    filesBox(el('p', 'msg card', 'Loading files\u2026'));
+    fetchRepoFiles(force === true).then(renderFiles).catch(function (e) {
+      var msg = e.status === 403 || e.status === 429 ? 'GitHub allows 60 file checks an hour per network and they\u2019re used up. Try again in a few minutes.'
+        : e.status === 404 ? 'Couldn\u2019t find the repo ' + FILES.repo + '. It needs to be public.'
+        : e.status === 409 ? 'The repo is empty, so there are no files yet.'
+        : 'Couldn\u2019t reach GitHub to list the files.';
+      var card = emptyCard('Files didn\u2019t load', msg);
+      var retry = btn('', 'refresh', 'Try again');
+      retry.onclick = function () { loadFiles(true); };
+      card.firstChild.append(retry);
+      filesBox(card);
+    });
   }
 
   function groupFiles(items) {
@@ -640,7 +1067,7 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
     var refresh = btn('icon', 'refresh');
     refresh.title = 'Refresh';
     refresh.setAttribute('aria-label', 'Refresh file list');
-    refresh.onclick = loadFiles;
+    refresh.onclick = function () { loadFiles(true); };
     sideHead.append(el('h2', '', 'Folders'), refresh);
     var ul = el('ul');
     side.append(sideHead, ul);
@@ -684,11 +1111,11 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
     var info = el('div', 'finfo');
     var name = el('button', 'fname', f.name);
     name.type = 'button';
-    name.onclick = function () { view(f); };
+    name.onclick = function () { openFile(f); };
     info.append(name, el('span', 'fmeta', fmtSize(f.size)));
     var acts = el('div', 'factions');
     var v = btn('', '', 'View');
-    v.onclick = function () { view(f); };
+    v.onclick = function () { openFile(f); };
     var d = btn('icon', 'download', '', f.url);
     d.setAttribute('download', f.base);
     d.setAttribute('aria-label', 'Download ' + f.base);
@@ -705,7 +1132,7 @@ dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
 
   function frame(src, title) { var f = el('iframe'); f.src = src; f.title = title; return f; }
 
-  function view(f) {
+  function openFile(f) {
     var body = $('vBody'), node;
     var live = location.protocol === 'https:' && !/^(localhost|127\.)/.test(location.hostname);
     var abs = new URL(f.url, location.href).href;
