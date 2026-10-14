@@ -1,5 +1,5 @@
 {
-  "title": "Weekly Timetable",
+  "title": "Trio Hub",
   "lessons": [
     { "day": "Mon", "start": "09:00", "end": "11:00", "title": "Employability and Global Citizenship", "info": "CS2002 · AL207 Allen Building · Lecture" },
     { "day": "Mon", "start": "13:00", "end": "14:00", "title": "Reading", "info": "Library" },
@@ -24,5 +24,8 @@
   "assignments": [
     { "due": "2026-12-10", "title": "Presentation", "info": "Group", "desc": "8am on the 10th" },
     { "due": "2027-01-01", "title": "Portfolio", "info": "Individual", "desc": "To be taken." }
+  ],
+  "results": [
+    { "title": "Weekly test results", "url": "https://docs.google.com/spreadsheets/d/1LfIfxX0ny6RUYYmkU4HmuQPNJhmbLkX83CiIphh_WxY/edit?usp=sharing" }
   ]
 }
