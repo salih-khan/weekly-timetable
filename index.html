@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weekly Lesson Timetable</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: title + tab switch on top; Week = hour grid with assignments rail; Results = one embedded Google file at a time; Files = folder rail, file list and a pop-up viewer */
+:root{
+  --bg:#f3f4f7; --surface:#ffffff; --ink:#0f1115; --muted:#6a7183;
+  --line:#e4e7ed; --line-soft:#eff1f5; --today:#f7f8fc; --now:#e5484d; --focus:#3d63e0;
+  --sans:"Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --hour:64px;
+  --blue-bg:#e5ecff;   --blue-fg:#1c3a96;
+  --green-bg:#e0f4e8;  --green-fg:#1b5835;
+  --amber-bg:#fcefd4;  --amber-fg:#774809;
+  --rose-bg:#fde5ea;   --rose-fg:#8a2135;
+  --violet-bg:#ede7fe; --violet-fg:#4a2b96;
+  --teal-bg:#daf2f1;   --teal-fg:#14585a;
+  --slate-bg:#e9ecf1;  --slate-fg:#3a4252;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c0e12; --surface:#15181e; --ink:#eef0f4; --muted:#9097a6;
+    --line:#262a33; --line-soft:#1d2027; --today:#1a1e27; --now:#ff6369; --focus:#8ea2ff;
+    --blue-bg:#1a2550;   --blue-fg:#cdd8ff;
+    --green-bg:#143327;  --green-fg:#bdebd0;
+    --amber-bg:#352910;  --amber-fg:#f5d99d;
+    --rose-bg:#3a1b24;   --rose-fg:#ffc9d3;
+    --violet-bg:#271f45; --violet-fg:#dbcfff;
+    --teal-bg:#113233;   --teal-fg:#b6e8e7;
+    --slate-bg:#232833;  --slate-fg:#d0d6e0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c0e12; --surface:#15181e; --ink:#eef0f4; --muted:#9097a6;
+  --line:#262a33; --line-soft:#1d2027; --today:#1a1e27; --now:#ff6369; --focus:#8ea2ff;
+  --blue-bg:#1a2550;   --blue-fg:#cdd8ff;
+  --green-bg:#143327;  --green-fg:#bdebd0;
+  --amber-bg:#352910;  --amber-fg:#f5d99d;
+  --rose-bg:#3a1b24;   --rose-fg:#ffc9d3;
+  --violet-bg:#271f45; --violet-fg:#dbcfff;
+  --teal-bg:#113233;   --teal-fg:#b6e8e7;
+  --slate-bg:#232833;  --slate-fg:#d0d6e0;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
+a,button{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.page{max-width:1440px;margin:0 auto;padding-inline:24px;padding-block:32px 56px;display:grid;gap:20px}
+
+/* Header + tabs */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 24px}
+h1{margin:0;font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.035em;line-height:1.05}
+.tabs{display:flex;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.tabs a{padding:8px 18px;border-radius:10px;font-size:14px;font-weight:550;color:var(--muted);text-decoration:none;text-align:center}
+.tabs a:hover{color:var(--ink)}
+.tabs a[aria-selected="true"]{background:var(--ink);color:var(--surface)}
+
+/* Shared pieces */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;min-width:0}
+.card-head{display:flex;align-items:center;gap:8px;padding:12px 12px 12px 18px;border-bottom:1px solid var(--line)}
+.card-head h2{flex:1;min-width:0;margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere}
+.card-head h2 small{margin-left:8px;font-family:var(--mono);font-size:11.5px;font-weight:400;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap;cursor:pointer;flex:none}
+.btn:hover{background:var(--bg)}
+.btn svg{width:15px;height:15px;flex:none}
+.btn.icon{width:32px;padding:0}
+.btn.solid{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.btn.solid:hover{opacity:.88}
+.msg{margin:0;padding:24px;color:var(--muted)}
+.stack{display:grid;gap:12px;min-width:0}
+.empty-state{display:grid;gap:10px;justify-items:start;padding:28px 24px;max-width:72ch}
+.empty-state h3{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.empty-state p{margin:0;color:var(--muted)}
+.empty-state .note{font-size:13px}
+.snippet{margin:0;max-width:100%;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-family:var(--mono);font-size:12.5px;line-height:1.5;overflow-x:auto}
+
+[data-c="blue"]{--c-bg:var(--blue-bg);--c-fg:var(--blue-fg)}
+[data-c="green"]{--c-bg:var(--green-bg);--c-fg:var(--green-fg)}
+[data-c="amber"]{--c-bg:var(--amber-bg);--c-fg:var(--amber-fg)}
+[data-c="rose"]{--c-bg:var(--rose-bg);--c-fg:var(--rose-fg)}
+[data-c="violet"]{--c-bg:var(--violet-bg);--c-fg:var(--violet-fg)}
+[data-c="teal"]{--c-bg:var(--teal-bg);--c-fg:var(--teal-fg)}
+[data-c="slate"]{--c-bg:var(--slate-bg);--c-fg:var(--slate-fg)}
+
+/* Week */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}
+.wrap{position:relative;overflow-x:auto}
+.board{display:grid;grid-template-columns:56px repeat(var(--days,5),minmax(130px,1fr));min-width:calc(56px + var(--days,5) * 130px)}
+.corner{position:sticky;left:0;z-index:4;background:var(--surface);border-bottom:1px solid var(--line);border-top-left-radius:17px}
+.head{display:flex;align-items:center;gap:8px;padding:16px 12px 14px;border-bottom:1px solid var(--line);border-left:1px solid var(--line-soft);font-size:14px;font-weight:600;letter-spacing:-.01em}
+.head.today{background:var(--today)}
+.pill{font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px;background:var(--ink);color:var(--surface)}
+.times{position:sticky;left:0;z-index:3;height:var(--h);background:var(--surface)}
+.times span{position:absolute;right:10px;font-family:var(--mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.col{position:relative;height:var(--h);border-left:1px solid var(--line-soft);
+  background-image:linear-gradient(to bottom,var(--line-soft) 1px,transparent 1px);background-size:100% var(--hour)}
+.col.today{background-color:var(--today)}
+.lesson{position:absolute;z-index:1;display:flex;flex-direction:column;gap:2px;min-width:0;padding:7px 10px;border-radius:10px;overflow:hidden;background:var(--c-bg);color:var(--c-fg)}
+.lesson time{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;opacity:.8}
+.lesson strong{font-size:14px;font-weight:600;line-height:1.2;letter-spacing:-.01em;overflow-wrap:anywhere}
+.lesson span{font-size:12.5px;opacity:.8}
+.lesson.short{flex-direction:row;align-items:baseline;gap:6px;padding-block:4px}
+.lesson.short strong{order:-1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lesson.short time{flex:none}
+.now{position:absolute;left:0;right:0;height:2px;background:var(--now);z-index:2;pointer-events:none}
+.now::before{content:"";position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--now)}
+
+/* Assignments */
+.side{position:sticky;top:16px;display:grid;gap:12px;padding:16px}
+.side h2{margin:0;padding:2px 4px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.tasks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.task{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:start;padding:10px;border-radius:12px;background:var(--bg)}
+.task.past{opacity:.5}
+.cal{display:grid;justify-items:center;gap:3px;padding:7px 0 6px;border-radius:10px;background:var(--surface);border:1px solid var(--line);line-height:1}
+.cal b{font-size:18px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cal small{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.task strong{display:block;font-size:14px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.task p{margin:2px 0 0;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.desc{margin-top:6px;font-size:13px;line-height:1.45;white-space:pre-line;overflow-wrap:anywhere}
+.due{display:inline-block;margin-top:7px;padding:2px 8px;border-radius:999px;font-family:var(--mono);font-size:11px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.due.near{background:var(--amber-bg);color:var(--amber-fg);border-color:transparent}
+.due.soon{background:var(--rose-bg);color:var(--rose-fg);border-color:transparent}
+.none{padding:4px;font-size:13px;color:var(--muted)}
+
+/* Results */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+.chip:hover{color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.clip{overflow:hidden}
+.frame{display:block;width:100%;height:clamp(460px,72vh,960px);border:0;background:var(--surface)}
+.card-foot{margin:0;padding:10px 18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+
+/* Files */
+.files{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;align-items:start}
+.folders{position:sticky;top:16px}
+.folders ul,.rows{list-style:none;margin:0;padding:6px;display:grid;gap:2px}
+.folder{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:10px;background:transparent;color:var(--ink);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.folder:hover{background:var(--bg)}
+.folder[aria-current="true"]{background:var(--bg);font-weight:600}
+.folder svg{flex:none;width:18px;height:18px;color:var(--muted)}
+.folder span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.folder small{font-family:var(--mono);font-size:11px;font-weight:400;color:var(--muted)}
+.file{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 10px;border-radius:12px}
+.file:hover{background:var(--bg)}
+.badge{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--c-bg);color:var(--c-fg);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.03em;text-transform:uppercase}
+.finfo{display:grid;gap:1px;min-width:0}
+.fname{padding:0;border:0;background:none;color:var(--ink);font:inherit;font-size:14px;font-weight:500;text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.fname:hover{text-decoration:underline;text-underline-offset:3px}
+.fmeta{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.factions{display:flex;gap:6px}
+
+/* Viewer */
+dialog.viewer{padding:0;border:0;border-radius:18px;background:var(--surface);color:var(--ink);width:min(1100px,calc(100vw - 32px));height:min(88vh,1000px);max-width:none;max-height:none;overflow:hidden;box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}
+dialog.viewer[open]{display:flex;flex-direction:column}
+dialog.viewer::backdrop{background:rgba(8,10,14,.55)}
+.vhead{display:flex;align-items:center;gap:8px;padding:12px 12px 12px 18px;border-bottom:1px solid var(--line)}
+.vhead h2{flex:1;min-width:0;margin:0;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vbody{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1fr);place-items:center;background:var(--bg);overflow:auto}
+.vbody iframe{width:100%;height:100%;border:0;background:var(--surface)}
+.vbody img,.vbody video{max-width:100%;max-height:100%;object-fit:contain}
+.vbody pre{align-self:stretch;justify-self:stretch;margin:0;padding:20px 24px;background:var(--surface);font-family:var(--mono);font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto}
+.vnote{display:grid;justify-items:center;gap:10px;padding:32px;text-align:center;color:var(--muted)}
+.vnote strong{color:var(--ink);font-size:15px}
+
+@media (max-width:1100px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .side{position:static}
+}
+@media (max-width:760px){
+  .page{padding-inline:16px;padding-block:20px 40px;gap:16px}
+  .tabs{flex:1 1 100%}
+  .tabs a{flex:1;padding-inline:8px}
+  .board{grid-template-columns:48px repeat(var(--days,5),minmax(120px,1fr));min-width:calc(48px + var(--days,5) * 120px)}
+  .files{grid-template-columns:minmax(0,1fr)}
+  .folders{position:static}
+  .folders ul{display:flex;flex-wrap:wrap;gap:6px;padding:10px}
+  .folders li{min-width:0;max-width:100%}
+  .folder{width:auto;max-width:100%;padding:6px 12px;border:1px solid var(--line)}
+  .folder svg{display:none}
+  .file{grid-template-columns:36px minmax(0,1fr) auto;gap:10px;padding:8px 6px}
+  .badge{width:36px;height:36px;font-size:9.5px}
+  dialog.viewer{width:100vw;height:100%;max-height:100%;border-radius:0}
+  .vhead .btn span{display:none}
+  .vhead .btn{width:32px;padding:0}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="top">
+    <h1 id="title">Weekly Timetable</h1>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <a href="#week" role="tab" data-tab="week" aria-selected="true">Week</a>
+      <a href="#results" role="tab" data-tab="results" aria-selected="false">Results</a>
+      <a href="#files" role="tab" data-tab="files" aria-selected="false">Files</a>
+    </nav>
+  </header>
+
+  <section id="panel-week" class="layout" role="tabpanel" aria-label="Week">
+    <div class="card wrap" id="wrap"><div class="board" id="board"></div></div>
+    <aside class="card side">
+      <h2>Assignments</h2>
+      <ul class="tasks" id="tasks"></ul>
+    </aside>
+  </section>
+
+  <section id="panel-results" class="stack" role="tabpanel" aria-label="Results" hidden>
+    <div class="stack" id="results"></div>
+  </section>
+
+  <section id="panel-files" role="tabpanel" aria-label="Files" hidden>
+    <div id="files"></div>
+  </section>
+</main>
+
+<dialog class="viewer" id="viewer" aria-labelledby="vTitle">
+  <div class="vhead">
+    <h2 id="vTitle">File</h2>
+    <a class="btn" id="vOpen" target="_blank" rel="noopener" title="Open in a new tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg><span>Open</span></a>
+    <a class="btn" id="vDownload" title="Download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg><span>Download</span></a>
+    <button class="btn icon" id="vClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="vbody" id="vBody"></div>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+
+  var DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  var COLOURS = ['blue', 'green', 'amber', 'rose', 'violet', 'teal'];
+  var TABS = ['week', 'results', 'files'];
+  var DATA = {};
+  var WEEK = {};
+  var started = {};
+  var $ = function (id) { return document.getElementById(id); };
+
+  var SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  var ICON = {
+    open: SVG + '<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>',
+    download: SVG + '<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>',
+    upload: SVG + '<path d="M12 20V9"/><path d="M7 14l5-5 5 5"/><path d="M5 4h14"/></svg>',
+    refresh: SVG + '<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>',
+    folder: SVG + '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'
+  };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
+  function btn(cls, icon, label, href) {
+    var b = el(href ? 'a' : 'button', 'btn' + (cls ? ' ' + cls : ''));
+    if (href) b.href = href; else b.type = 'button';
+    if (icon) b.innerHTML = ICON[icon];
+    if (label) b.append(el('span', '', label));
+    return b;
+  }
+  function newTab(a) { a.target = '_blank'; a.rel = 'noopener'; return a; }
+  function natural(a, b) { return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }); }
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function recall(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function mins(t) {
+    var m = /^(\d{1,2})[:.](\d{2})$/.exec(String(t || '').trim());
+    return m ? +m[1] * 60 + +m[2] : null;
+  }
+  function hhmm(m) {
+    return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  }
+  function dayIndex(d) {
+    var k = String(d || '').trim().slice(0, 3).toLowerCase();
+    return DAYS.findIndex(function (n) { return n.toLowerCase() === k; });
+  }
+  function emptyCard(title, text, snippet, note) {
+    var card = el('div', 'card'), box = el('div', 'empty-state');
+    box.append(el('h3', '', title), el('p', '', text));
+    if (snippet) box.append(el('pre', 'snippet', snippet));
+    if (note) box.append(el('p', 'note', note));
+    card.append(box);
+    return card;
+  }
+
+  /* ---------- Tabs ---------- */
+  function show(tab) {
+    if (TABS.indexOf(tab) < 0) tab = 'week';
+    TABS.forEach(function (t) {
+      $('panel-' + t).hidden = t !== tab;
+      document.querySelector('[data-tab="' + t + '"]').setAttribute('aria-selected', String(t === tab));
+    });
+    if (!started[tab]) {
+      started[tab] = true;
+      if (tab === 'week') scrollToToday();
+      if (tab === 'results') renderResults();
+      if (tab === 'files') loadFiles();
+    }
+  }
+  function start() {
+    show(location.hash.slice(1));
+    window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+  }
+
+  /* ---------- Load timetable.json ---------- */
+  fetch('timetable.json?v=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error(); return r.text(); })
+    .then(function (text) {
+      try { DATA = JSON.parse(text) || {}; }
+      catch (e) {
+        weekError('timetable.json has a typo: ' + e.message + '. Look for a missing comma, quote or bracket.');
+        return start();
+      }
+      var title = DATA.title || 'Weekly Timetable';
+      $('title').textContent = title;
+      document.title = title;
+      buildWeek();
+      renderTasks(DATA.assignments || []);
+      start();
+    }, function () {
+      weekError(location.protocol === 'file:'
+        ? 'Browsers won’t load timetable.json when this page is opened straight from a folder. Put both files on a host, or run a local server in the folder (e.g. npx serve).'
+        : 'Couldn’t find timetable.json. Put it in the same folder as this page.');
+      start();
+    });
+
+  function weekError(msg) { $('wrap').replaceChildren(el('p', 'msg', msg)); }
+
+  /* ---------- Week ---------- */
+  function buildWeek() {
+    var board = $('board');
+
+    /* Clean up lessons and give each subject one colour */
+    var colourOf = {}, n = 0;
+    var lessons = (DATA.lessons || []).map(function (l) {
+      var s = mins(l.start), e = mins(l.end);
+      return { d: dayIndex(l.day), s: s, e: e > s ? e : s + 60, title: String(l.title || ''), info: l.info || '', colour: l.colour };
+    }).filter(function (l) { return l.d > -1 && l.s != null && l.title; });
+    lessons.forEach(function (l) {
+      var k = l.title.toLowerCase();
+      if (!colourOf[k]) colourOf[k] = COLOURS.indexOf(l.colour) > -1 ? l.colour : COLOURS[n++ % COLOURS.length];
+      l.c = colourOf[k];
+    });
+
+    /* Mon–Fri always, weekend only if used; hours fitted to the lessons */
+    var days = [0, 1, 2, 3, 4];
+    lessons.forEach(function (l) { if (days.indexOf(l.d) < 0) days.push(l.d); });
+    days.sort();
+    var r0 = lessons.length ? Math.floor(Math.min.apply(null, lessons.map(function (l) { return l.s; })) / 60) * 60 : 540;
+    var r1 = lessons.length ? Math.ceil(Math.max.apply(null, lessons.map(function (l) { return l.e; })) / 60) * 60 : 1020;
+    var at = function (m) { return 'calc(' + (m - r0) / 60 + ' * var(--hour))'; };
+
+    var today = (new Date().getDay() + 6) % 7;
+    board.style.setProperty('--days', days.length);
+    board.style.setProperty('--h', at(r1));
+
+    board.append(el('div', 'corner'));
+    days.forEach(function (d) {
+      var h = el('div', 'head' + (d === today ? ' today' : ''), DAYS[d]);
+      if (d === today) h.append(el('span', 'pill', 'Today'));
+      board.append(h);
+    });
+
+    var times = el('div', 'times');
+    for (var m = r0; m < r1; m += 60) {
+      var t = el('span', '', hhmm(m));
+      t.style.top = 'calc(' + at(m) + ' + 5px)';
+      times.append(t);
+    }
+    board.append(times);
+    WEEK.times = times;
+
+    days.forEach(function (d) {
+      var col = el('div', 'col' + (d === today ? ' today' : ''));
+      if (d === today) WEEK.todayCol = col;
+      var list = lessons.filter(function (l) { return l.d === d; }).sort(function (a, b) { return a.s - b.s; });
+
+      /* Overlapping lessons sit side by side */
+      var group = [], groupEnd = -1;
+      function place() {
+        var lanes = [];
+        group.forEach(function (l) {
+          var i = lanes.findIndex(function (end) { return end <= l.s; });
+          if (i < 0) { i = lanes.length; lanes.push(l.e); } else lanes[i] = l.e;
+          l.lane = i;
+        });
+        group.forEach(function (l) { l.lanes = lanes.length; });
+        group = [];
+      }
+      list.forEach(function (l) {
+        if (group.length && l.s >= groupEnd) place();
+        group.push(l);
+        groupEnd = Math.max(groupEnd, l.e);
+      });
+      if (group.length) place();
+
+      list.forEach(function (l) {
+        var card = el('article', 'lesson' + (l.e - l.s < 50 ? ' short' : ''));
+        card.dataset.c = l.c;
+        card.style.top = 'calc(' + at(l.s) + ' + 2px)';
+        card.style.height = 'calc(' + (l.e - l.s) / 60 + ' * var(--hour) - 4px)';
+        card.style.left = 'calc(' + (l.lane / l.lanes) * 100 + '% + 4px)';
+        card.style.width = 'calc(' + 100 / l.lanes + '% - 8px)';
+        card.title = l.title + '\n' + hhmm(l.s) + '–' + hhmm(l.e) + (l.info ? '\n' + l.info : '');
+        card.append(el('time', '', hhmm(l.s) + '–' + hhmm(l.e)), el('strong', '', l.title));
+        if (l.info && l.e - l.s >= 50) card.append(el('span', '', l.info));
+        col.append(card);
+      });
+      board.append(col);
+    });
+
+    /* Red line at the current time, refreshed every minute */
+    function placeNow() {
+      var old = board.querySelector('.now');
+      if (old) old.remove();
+      var d = new Date(), m = d.getHours() * 60 + d.getMinutes();
+      if (!WEEK.todayCol || m < r0 || m > r1) return;
+      var line = el('div', 'now');
+      line.style.top = 'calc(' + at(m) + ' - 1px)';
+      WEEK.todayCol.append(line);
+    }
+    placeNow();
+    setInterval(placeNow, 60000);
+  }
+
+  /* On narrow screens, start the grid scrolled to today */
+  function scrollToToday() {
+    var wrap = $('wrap');
+    if (WEEK.todayCol && wrap.scrollWidth > wrap.clientWidth) wrap.scrollLeft = WEEK.todayCol.offsetLeft - WEEK.times.offsetWidth;
+  }
+
+  /* ---------- Assignments ---------- */
+  function renderTasks(list) {
+    var ul = $('tasks');
+    var now = new Date(); now.setHours(0, 0, 0, 0);
+    var items = list.map(function (a) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(a.due || '').trim());
+      if (!m) return null;
+      var date = new Date(+m[1], +m[2] - 1, +m[3]);
+      return { title: String(a.title || 'Assignment'), info: a.info || '', desc: a.desc || '', date: date, days: Math.round((date - now) / 86400000) };
+    }).filter(Boolean).sort(function (a, b) {
+      if ((a.days < 0) !== (b.days < 0)) return a.days < 0 ? 1 : -1;
+      return a.days < 0 ? b.date - a.date : a.date - b.date;
+    });
+
+    ul.replaceChildren();
+    if (!items.length) { ul.append(el('li', 'none', 'Nothing due')); return; }
+
+    items.forEach(function (a) {
+      var li = el('li', 'task' + (a.days < 0 ? ' past' : ''));
+      var cal = el('div', 'cal');
+      cal.append(el('b', '', String(a.date.getDate())), el('small', '', a.date.toLocaleDateString('en-GB', { month: 'short' })));
+      var body = el('div');
+      body.append(el('strong', '', a.title));
+      if (a.info) body.append(el('p', '', a.info));
+      if (a.desc) body.append(el('div', 'desc', a.desc));
+      var when = a.days < 0 ? 'Passed' : a.days === 0 ? 'Due today' : a.days === 1 ? 'Due tomorrow' : 'In ' + a.days + ' days';
+      var weekday = a.date.toLocaleDateString('en-GB', { weekday: 'short' });
+      body.append(el('span', 'due' + (a.days >= 0 && a.days <= 7 ? ' soon' : a.days > 7 && a.days <= 21 ? ' near' : ''), weekday + ' · ' + when));
+      li.append(cal, body);
+      ul.append(li);
+    });
+  }
+
+  /* ---------- Results (Google Sheets, Docs, Slides or Drive) ---------- */
+  function googleEmbed(u) {
+    var m;
+    if (/\/d\/e\//.test(u)) return /pubhtml/.test(u) ? u + (u.indexOf('?') > -1 ? '&' : '?') + 'widget=true&headers=false' : u;
+    if ((m = /docs\.google\.com\/(spreadsheets|document|presentation)\/d\/([\w-]+)/.exec(u))) return 'https://docs.google.com/' + m[1] + '/d/' + m[2] + '/preview';
+    if ((m = /drive\.google\.com\/file\/d\/([\w-]+)/.exec(u))) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
+    if ((m = /drive\.google\.com\/drive\/(?:u\/\d+\/)?folders\/([\w-]+)/.exec(u))) return 'https://drive.google.com/embeddedfolderview?id=' + m[1] + '#list';
+    return u;
+  }
+  function openLabel(u) {
+    if (/spreadsheets/.test(u)) return 'Open in Sheets';
+    if (/\/document\//.test(u)) return 'Open in Docs';
+    if (/presentation/.test(u)) return 'Open in Slides';
+    if (/drive\.google/.test(u)) return 'Open in Drive';
+    return 'Open';
+  }
+  function renderResults() {
+    var box = $('results');
+    var list = (DATA.results || []).filter(function (r) { return r && r.url; });
+    box.replaceChildren();
+    if (!list.length) {
+      box.append(emptyCard(
+        'No results linked yet',
+        'Add a Google Sheet to "results" in timetable.json and it shows here.',
+        '"results": [\n  { "title": "HSK mock scores", "url": "https://docs.google.com/spreadsheets/d/..." }\n]',
+        'Set the sheet’s sharing to “Anyone with the link” so it can show here.'));
+      return;
+    }
+
+    var chips = el('div', 'chips');
+    var card = el('div', 'card clip');
+    var head = el('div', 'card-head');
+    var h = el('h2');
+    var open = newTab(btn('', 'open', 'Open', '#'));
+    head.append(h, open);
+    var frame = el('iframe', 'frame');
+    frame.setAttribute('allow', 'fullscreen');
+    card.append(head, frame, el('p', 'card-foot', 'Blank or asking for access? Share the file as “Anyone with the link”.'));
+
+    function pick(i) {
+      var r = list[i];
+      h.textContent = r.title || 'Untitled';
+      open.href = r.url;
+      open.querySelector('span').textContent = openLabel(r.url);
+      frame.title = r.title || 'Google file';
+      frame.src = googleEmbed(r.url);
+      Array.prototype.forEach.call(chips.children, function (c, j) { c.setAttribute('aria-pressed', String(j === i)); });
+      store('hub-result', String(i));
+    }
+    if (list.length > 1) {
+      list.forEach(function (r, i) {
+        var c = el('button', 'chip', r.title || 'Untitled');
+        c.type = 'button';
+        c.onclick = function () { pick(i); };
+        chips.append(c);
+      });
+      box.append(chips);
+    }
+    box.append(card);
+    var saved = parseInt(recall('hub-result'), 10) || 0;
+    pick(saved < list.length ? saved : 0);
+  }
+
+  /* ---------- Files (everything inside the repo's files/ folder) ---------- */
+  var FILES = { repo: null, branch: 'main', folders: [] };
+  var KIND = {
+    pdf: 'rose', doc: 'blue', docx: 'blue', odt: 'blue', rtf: 'blue', pages: 'blue',
+    xls: 'green', xlsx: 'green', csv: 'green', ods: 'green', numbers: 'green',
+    ppt: 'amber', pptx: 'amber', key: 'amber', odp: 'amber',
+    png: 'violet', jpg: 'violet', jpeg: 'violet', gif: 'violet', webp: 'violet', svg: 'violet', heic: 'violet', avif: 'violet',
+    mp3: 'teal', wav: 'teal', m4a: 'teal', ogg: 'teal', mp4: 'teal', mov: 'teal', webm: 'teal', m4v: 'teal'
+  };
+
+  function detectRepo() {
+    if (DATA.repo) return String(DATA.repo).replace(/^https?:\/\/github\.com\//, '').replace(/\/+$/, '');
+    var m = /^([^.]+)\.github\.io$/i.exec(location.hostname);
+    if (!m) return null;
+    var seg = location.pathname.split('/').filter(Boolean)[0];
+    return m[1] + '/' + (seg && !/\.html?$/i.test(seg) ? seg : m[1].toLowerCase() + '.github.io');
+  }
+  function getJSON(u) {
+    return fetch(u).then(function (r) {
+      if (!r.ok) { var e = new Error('HTTP ' + r.status); e.status = r.status; throw e; }
+      return r.json();
+    });
+  }
+  function filesBox(node) { $('files').replaceChildren(node); }
+
+  function loadFiles() {
+    FILES.repo = detectRepo();
+    if (!FILES.repo) {
+      filesBox(emptyCard('Files live in the GitHub repo',
+        'Open this page on its GitHub Pages address to browse them, or add "repo": "your-name/your-repo" to timetable.json.'));
+      return;
+    }
+    filesBox(el('p', 'msg card', 'Loading files…'));
+    var api = 'https://api.github.com/repos/' + FILES.repo;
+    getJSON(api)
+      .then(function (info) {
+        FILES.branch = info.default_branch || 'main';
+        return getJSON(api + '/git/trees/' + encodeURIComponent(FILES.branch) + '?recursive=1');
+      })
+      .then(function (tree) {
+        FILES.folders = groupFiles(tree.tree || []);
+        renderFiles();
+      })
+      .catch(function (e) {
+        var msg = e.status === 403 || e.status === 429 ? 'GitHub allows 60 file checks an hour per network and they’re used up. Try again in a few minutes.'
+          : e.status === 404 ? 'Couldn’t find the repo ' + FILES.repo + '. It needs to be public.'
+          : e.status === 409 ? 'The repo is empty, so there are no files yet.'
+          : 'Couldn’t reach GitHub to list the files.';
+        var card = emptyCard('Files didn’t load', msg);
+        var retry = btn('', 'refresh', 'Try again');
+        retry.onclick = loadFiles;
+        card.firstChild.append(retry);
+        filesBox(card);
+      });
+  }
+
+  function groupFiles(items) {
+    var map = {};
+    items.forEach(function (it) {
+      if (it.type !== 'blob' || it.path.indexOf('files/') !== 0) return;
+      var rel = it.path.slice(6), parts = rel.split('/');
+      var folder = parts.length > 1 ? parts[0] : 'General';
+      if (folder.charAt(0) === '.') return;
+      map[folder] = map[folder] || [];
+      if (/(^|\/)\./.test(rel)) return; /* hidden files like .gitkeep keep a folder without listing */
+      var base = parts[parts.length - 1], dot = base.lastIndexOf('.');
+      map[folder].push({
+        name: parts.length > 1 ? parts.slice(1).join(' / ') : rel,
+        base: base,
+        ext: dot > 0 ? base.slice(dot + 1).toLowerCase() : '',
+        size: it.size || 0,
+        url: it.path.split('/').map(encodeURIComponent).join('/')
+      });
+    });
+    return Object.keys(map).sort(natural).map(function (k) {
+      return { name: k, files: map[k].sort(function (a, b) { return natural(a.name, b.name); }) };
+    });
+  }
+
+  function fmtSize(b) {
+    return b < 1024 ? b + ' B' : b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+  }
+
+  function renderFiles() {
+    var repoUrl = 'https://github.com/' + FILES.repo;
+    var uploadRoot = repoUrl + '/upload/' + encodeURIComponent(FILES.branch);
+
+    if (!FILES.folders.length) {
+      var card = emptyCard('No files yet',
+        'Make a folder called files in the repo. Every folder inside it shows up here, ready to view or download.', null,
+        'On GitHub: Add file → Upload files, then drag in a folder named files with your folders inside.');
+      card.firstChild.append(newTab(btn('solid', 'upload', 'Upload on GitHub', uploadRoot)));
+      return filesBox(card);
+    }
+
+    var names = FILES.folders.map(function (f) { return f.name; });
+    var cur = recall('hub-folder');
+    if (names.indexOf(cur) < 0) cur = names[0];
+
+    var layout = el('div', 'files');
+    var side = el('aside', 'card folders');
+    var sideHead = el('div', 'card-head');
+    var refresh = btn('icon', 'refresh');
+    refresh.title = 'Refresh';
+    refresh.setAttribute('aria-label', 'Refresh file list');
+    refresh.onclick = loadFiles;
+    sideHead.append(el('h2', '', 'Folders'), refresh);
+    var ul = el('ul');
+    side.append(sideHead, ul);
+    var main = el('section', 'card filelist');
+    layout.append(side, main);
+
+    FILES.folders.forEach(function (f) {
+      var li = el('li'), b = el('button', 'folder');
+      b.type = 'button';
+      b.dataset.name = f.name;
+      b.innerHTML = ICON.folder;
+      b.append(el('span', '', f.name), el('small', '', String(f.files.length)));
+      b.onclick = function () { select(f.name); };
+      li.append(b);
+      ul.append(li);
+    });
+
+    function select(name) {
+      store('hub-folder', name);
+      ul.querySelectorAll('.folder').forEach(function (b) { b.setAttribute('aria-current', String(b.dataset.name === name)); });
+      var f = FILES.folders[names.indexOf(name)];
+      var head = el('div', 'card-head'), h = el('h2', '', f.name);
+      h.append(el('small', '', f.files.length + (f.files.length === 1 ? ' file' : ' files')));
+      var target = f.name === 'General' ? '/files' : '/files/' + encodeURIComponent(f.name);
+      head.append(h, newTab(btn('', 'upload', 'Upload', uploadRoot + target)));
+      main.replaceChildren(head);
+      if (!f.files.length) { main.append(el('p', 'msg', 'This folder is empty.')); return; }
+      var rows = el('ul', 'rows');
+      f.files.forEach(function (file) { rows.append(fileRow(file)); });
+      main.append(rows);
+    }
+
+    filesBox(layout);
+    select(cur);
+  }
+
+  function fileRow(f) {
+    var li = el('li', 'file');
+    var badge = el('span', 'badge', (f.ext || 'file').slice(0, 4));
+    badge.dataset.c = KIND[f.ext] || 'slate';
+    var info = el('div', 'finfo');
+    var name = el('button', 'fname', f.name);
+    name.type = 'button';
+    name.onclick = function () { view(f); };
+    info.append(name, el('span', 'fmeta', fmtSize(f.size)));
+    var acts = el('div', 'factions');
+    var v = btn('', '', 'View');
+    v.onclick = function () { view(f); };
+    var d = btn('icon', 'download', '', f.url);
+    d.setAttribute('download', f.base);
+    d.setAttribute('aria-label', 'Download ' + f.base);
+    d.title = 'Download';
+    acts.append(v, d);
+    li.append(badge, info, acts);
+    return li;
+  }
+
+  /* ---------- Viewer ---------- */
+  var IMG = /^(png|jpe?g|gif|webp|svg|avif|bmp)$/, VID = /^(mp4|webm|m4v|mov)$/, AUD = /^(mp3|wav|m4a|ogg|aac|flac)$/,
+      TXT = /^(txt|md|csv|tsv|json|log)$/, OFFICE = /^(docx?|xlsx?|pptx?)$/;
+  var dlg = $('viewer');
+
+  function frame(src, title) { var f = el('iframe'); f.src = src; f.title = title; return f; }
+
+  function view(f) {
+    var body = $('vBody'), node;
+    var live = location.protocol === 'https:' && !/^(localhost|127\.)/.test(location.hostname);
+    var abs = new URL(f.url, location.href).href;
+    $('vTitle').textContent = f.name;
+    $('vOpen').href = f.url;
+    $('vDownload').href = f.url;
+    $('vDownload').setAttribute('download', f.base);
+
+    if (f.ext === 'pdf') node = frame(f.url, f.name);
+    else if (IMG.test(f.ext)) { node = el('img'); node.src = f.url; node.alt = f.name; }
+    else if (VID.test(f.ext)) { node = el('video'); node.src = f.url; node.controls = true; node.playsInline = true; }
+    else if (AUD.test(f.ext)) { node = el('audio'); node.src = f.url; node.controls = true; }
+    else if (TXT.test(f.ext)) {
+      node = el('pre', '', 'Loading…');
+      fetch(f.url).then(function (r) { if (!r.ok) throw new Error(); return r.text(); })
+        .then(function (t) { node.textContent = t.length > 300000 ? t.slice(0, 300000) + '\n\n… cut short here. Download for the full file.' : t; })
+        .catch(function () { node.textContent = 'Couldn’t load this file.'; });
+    }
+    else if (OFFICE.test(f.ext) && live) {
+      node = frame('https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(abs), f.name);
+      $('vOpen').href = 'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(abs);
+    }
+    else {
+      node = el('div', 'vnote');
+      node.append(
+        el('strong', '', OFFICE.test(f.ext) ? 'Office previews work on the live site' : 'No preview for ' + (f.ext ? '.' + f.ext + ' files' : 'this file')),
+        el('span', '', 'Download it to open on your device.'));
+      var d = btn('solid', 'download', 'Download', f.url);
+      d.setAttribute('download', f.base);
+      node.append(d);
+    }
+
+    body.replaceChildren(node);
+    if (typeof dlg.showModal === 'function') { if (!dlg.open) dlg.showModal(); }
+    else dlg.setAttribute('open', '');
+  }
+
+  $('vClose').onclick = function () { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); };
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('close', function () { $('vBody').replaceChildren(); });
+})();
+</script>
+</body>
+</html>
